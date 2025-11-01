@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Reports - Car Repair</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Reports page ke liye specific professional CSS */
+        .report-container {
+            display: grid;
+            grid-template-columns: 300px 1fr; /* Nav thoda bada kiya */
+            gap: 20px;
+        }
+
+        .report-nav, .report-content {
+            background-color: var(--white-color);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+        }
+
+        .report-nav h3 {
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        /* Naya Accordion List Style */
+        .report-nav-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        /* Saal (Year) Item Style */
+        .year-item .year-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--dark-color);
+            border: 1px solid var(--border-color);
+        }
+        
+        .year-item .year-label:hover {
+            background-color: var(--light-color);
+        }
+
+        /* Arrow Icon (>) */
+        .year-arrow {
+            font-weight: 700;
+            transition: transform 0.3s ease;
+        }
+
+        /* Jab Year expand hoga (Arrow neeche) */
+        .year-item.expanded .year-arrow {
+            transform: rotate(90deg);
+        }
+        
+        /* Mahine (Month) ki list jo chhupi rahegi */
+        .month-list-nested {
+            list-style: none;
+            padding: 0;
+            margin-top: 5px;
+            margin-left: 20px; /* Indentation */
+            display: none; /* Default hidden */
+        }
+        
+        /* Jab Year expand hoga tab month list dikhegi */
+        .year-item.expanded .month-list-nested {
+            display: block;
+        }
+
+        /* Mahine (Month) ka Item Style */
+        .month-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        
+        .month-item:hover {
+            background-color: var(--light-color);
+            color: var(--primary-color);
+        }
+
+        .month-item.active {
+            background-color: var(--primary-color);
+            color: var(--white-color);
+            font-weight: 600;
+        }
+        
+        .invoice-count {
+            font-size: 0.9rem;
+            background-color: var(--border-color);
+            color: var(--grey-color);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+        .month-item.active .invoice-count {
+            background-color: var(--white-color);
+            color: var(--primary-color);
+        }
+
+        /* Right Side Content Area */
+        .report-content {
+            padding: 20px;
+        }
+        #reportTitle {
+            margin-top: 0;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+        .table-wrapper { 
+            overflow-x: auto; 
+        }
+        #invoiceListTable {
+            width: 100%;
+        }
+        /* Table row hover effect */
+        #invoiceListTableBody tr:hover {
+             background-color: var(--light-color);
+        }
+        
+        /* PDF Button Fix */
+        #invoiceListTableBody .btn-view-pdf {
+            padding: 5px 12px;
+            background-color: #17a2b8; /* Hardcoded color */
+            color: white;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 500;
+            display: inline-block;
+        }
+        #invoiceListTableBody .btn-view-pdf:hover {
+            opacity: 0.9;
+        }
+        
+        /* Professional Loading/Empty State */
+        .report-placeholder {
+            text-align: center;
+            padding: 60px 40px;
+            font-size: 1.1rem;
+            color: var(--grey-color);
+            background-color: var(--light-color);
+            border-radius: 6px;
+            border: 2px dashed var(--border-color);
+        }
+        #reportLoader {
+            display: none; 
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border-color);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        #reportMessage {
+            display: block; /* Pehle 'none' tha, ab 'block' */
+        }
+
+        /* Mobile layout */
+        @media (max-width: 992px) {
+            .report-container {
+                grid-template-columns: 1fr; /* Stack on mobile */
+            }
+        }
+    </style>
+
+     <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-firestore-compat.js"></script>
+
+    <script>
+      // ⚠️ IMPORTANT: Apna Firebase Config object yahaan paste karein
+      const firebaseConfig = {
+        apiKey: "AIzaSyCuejc7aR7-dLpcXh7uUTrWDsItWxQius8",
+        authDomain: "car-main-dashboard.firebaseapp.com",
+        projectId: "car-main-dashboard",
+        storageBucket: "car-main-dashboard.firebasestorage.app",
+        messagingSenderId: "574310288597",
+        appId: "1:574310288597:web:0859b5d5d453727fb2265c",
+        measurementId: "G-SMNFE0421H"
+      };
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore(); 
+    </script>
+    
+    <script src="auth-guard.js"></script>
+</head>
+<body>
+
+    <div class="container">
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h3>Car Repair Admin</h3>
+            </div>
+            <ul>
+                <li><a href="index.html">Dashboard</a></li>
+                <li><a href="create-invoice.html">Create Invoice</a></li>
+                <li><a href="manage-invoices.html">Manage Invoices</a></li>
+                
+                <li class="active"><a href="reports.html">Reports</a></li> <li><a href="#" id="logoutBtn">Logout</a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content"> <header class="main-header">
+                 <button class="menu-toggle" id="menuToggle">&#9776;</button>
+                 <h1>Invoice Reports</h1>
+            </header>
+            
+            <div class="report-container">
+                <nav class="report-nav">
+                    <h3>Browse by Period</h3>
+                    <ul class="report-nav-list" id="reportNavList">
+                        </ul>
+                </nav>
+
+                <section class="report-content">
+                    <h3 id="reportTitle">Select a Year & Month</h3>
+                    
+                    <div class="report-placeholder" id="reportPlaceholder">
+                        <div id="reportLoader"></div>
+                        <span id="reportMessage">Loading invoice data...</span>
+                    </div>
+
+                    <div class="table-wrapper" id="invoiceListContainer" style="display: none;">
+                        <table class="data-table" id="invoiceListTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Invoice #</th>
+                                    <th>Client Name</th>
+                                    <th>Phone No</th>
+                                    <th>View PDF</th>
+                                </tr>
+                            </thead>
+                            <tbody id="invoiceListTableBody">
+                                </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof db === 'undefined') {
+                console.error("Firestore (db) is not initialized.");
+                document.getElementById('reportTitle').innerText = "Application Config Error.";
+                return;
+            }
+
+            const reportNavList = document.getElementById('reportNavList');
+            const reportTitle = document.getElementById('reportTitle');
+            const reportPlaceholder = document.getElementById('reportPlaceholder');
+            const reportLoader = document.getElementById('reportLoader');
+            const reportMessage = document.getElementById('reportMessage');
+            const invoiceListContainer = document.getElementById('invoiceListContainer');
+            const invoiceListTableBody = document.getElementById('invoiceListTableBody');
+
+            let reportsData = {}; 
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+            loadAllInvoices();
+
+            async function loadAllInvoices() {
+                showLoader("Loading invoice data...");
+                reportsData = {}; 
+
+                try {
+                    const querySnapshot = await db.collection("invoices").orderBy("createdAt", "desc").get();
+
+                    if (querySnapshot.empty) {
+                        showEmpty("No invoices found in the database.");
+                        return;
+                    }
+
+                    querySnapshot.forEach(doc => {
+                        const invoice = doc.data();
+                        let year, month; 
+                        
+                        if (invoice.invoiceDate && invoice.invoiceDate.includes('/')) {
+                            const parts = invoice.invoiceDate.split('/'); 
+                            if (parts.length === 3) {
+                                year = parts[2]; 
+                                month = parseInt(parts[1], 10) - 1; 
+                            }
+                        }
+
+                        if (typeof year === 'undefined' || typeof month === 'undefined') {
+                            const createdAt = invoice.createdAt?.toDate(); 
+                            if (createdAt) {
+                                year = createdAt.getFullYear().toString();
+                                month = createdAt.getMonth(); 
+                            }
+                        }
+
+                        if (typeof year !== 'undefined' && typeof month !== 'undefined') {
+                            if (!reportsData[year]) {
+                                reportsData[year] = {};
+                            }
+                            if (!reportsData[year][month]) {
+                                reportsData[year][month] = {
+                                    totalInvoices: 0,
+                                    invoices: []
+                                };
+                            }
+                            reportsData[year][month].totalInvoices++;
+                            reportsData[year][month].invoices.push({
+                                date: invoice.invoiceDate || 'N/A',
+                                invoiceNo: invoice.invoiceNo || doc.id,
+                                clientName: invoice.clientName || 'N/A',
+                                clientPhone: invoice.clientPhone || 'N/A',
+                                pdfUrl: invoice.pdfUrl || '#'
+                            });
+                        }
+                    });
+
+                    renderReportNav();
+                    hideLoader();
+                    reportTitle.innerText = "Select a Year & Month";
+                    reportPlaceholder.style.display = 'block'; // Placeholder ko dikhayein
+                    reportMessage.innerText = "Please select a month from the left menu to view invoices.";
+                    
+                } catch (error) {
+                    console.error("Error loading all invoices: ", error);
+                    showEmpty("Error loading reports.");
+                }
+            }
+
+            function renderReportNav() {
+                reportNavList.innerHTML = '';
+                const years = Object.keys(reportsData).sort((a, b) => b - a); 
+
+                if (years.length === 0) {
+                     showEmpty("No data to display.");
+                     return;
+                }
+
+                years.forEach(year => {
+                    const yearLi = document.createElement('li');
+                    yearLi.className = 'year-item';
+                    
+                    const yearLabel = document.createElement('div');
+                    yearLabel.className = 'year-label';
+                    yearLabel.innerHTML = `
+                        <span>${year}</span>
+                        <span class="year-arrow">▶</span>
+                    `;
+                    yearLabel.addEventListener('click', (e) => {
+                        yearLi.classList.toggle('expanded');
+                        const allYearLabels = reportNavList.querySelectorAll('.year-label');
+                        allYearLabels.forEach(label => label.style.fontWeight = '600'); 
+                        e.currentTarget.style.fontWeight = '700'; 
+                    });
+                    
+                    const monthUl = document.createElement('ul');
+                    monthUl.className = 'month-list-nested';
+                    
+                    const yearData = reportsData[year];
+                    const months = Object.keys(yearData).sort((a, b) => b - a); 
+
+                    if (months.length > 0) {
+                        months.forEach(monthIndex => {
+                            const monthData = yearData[monthIndex];
+                            const monthLi = document.createElement('li');
+                            monthLi.className = 'month-item';
+                            monthLi.dataset.year = year;
+                            monthLi.dataset.month = monthIndex;
+                            monthLi.innerHTML = `
+                                <span>${monthNames[monthIndex]}</span>
+                                <span class="invoice-count">${monthData.totalInvoices}</span>
+                            `;
+                            
+                            monthLi.addEventListener('click', (e) => {
+                                reportNavList.querySelectorAll('.month-item').forEach(li => li.classList.remove('active'));
+                                e.currentTarget.classList.add('active');
+                                
+                                const invoices = reportsData[year][monthIndex].invoices;
+                                renderInvoiceList(invoices, year, monthIndex);
+                            });
+                            
+                            monthUl.appendChild(monthLi);
+                        });
+                    }
+                    yearLi.appendChild(yearLabel);
+                    yearLi.appendChild(monthUl);
+                    reportNavList.appendChild(yearLi);
+                });
+            }
+
+            function renderInvoiceList(invoices, year, month) {
+                invoiceListTableBody.innerHTML = ''; 
+                
+                if (!invoices || invoices.length === 0) {
+                    showEmpty("No invoices found for this period.");
+                    return;
+                }
+
+                hideLoader(); 
+                invoiceListContainer.style.display = 'block'; 
+                reportTitle.innerText = `Invoices for ${monthNames[month]} ${year}`;
+
+                invoices.sort((a, b) => {
+                    try {
+                        const dateA = new Date(a.date.split('/').reverse().join('-'));
+                        const dateB = new Date(b.date.split('/').reverse().join('-'));
+                        return dateB - dateA;
+                    } catch(e) {
+                        return 0;
+                    }
+                });
+
+                invoices.forEach(invoice => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${invoice.date}</td>
+                        <td><b>${invoice.invoiceNo}</b></td>
+                        <td>${invoice.clientName}</td>
+                        <td>${invoice.clientPhone}</td>
+                        <td>
+                            <a href="${invoice.pdfUrl}" target="_blank" class="btn-view-pdf">View PDF</a>
+                        </td>
+                    `;
+                    invoiceListTableBody.appendChild(row);
+                });
+            }
+
+            function showLoader(message) {
+                reportTitle.innerText = "Loading...";
+                invoiceListContainer.style.display = 'none';
+                reportPlaceholder.style.display = 'block';
+                reportLoader.style.display = 'block';
+                reportMessage.style.display = 'block';
+                reportMessage.innerText = message;
+            }
+            
+            function hideLoader() {
+                reportPlaceholder.style.display = 'none';
+                reportLoader.style.display = 'none';
+                reportMessage.style.display = 'none';
+            }
+
+            function showEmpty(message) {
+                reportTitle.innerText = "Reports";
+                invoiceListContainer.style.display = 'none';
+                reportPlaceholder.style.display = 'block';
+                reportLoader.style.display = 'none';
+                reportMessage.style.display = 'block';
+                reportMessage.innerText = message;
+            }
+        });
+    </script>
+
+    <script>
+        // Basic Hamburger Toggle for this page
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.querySelector('.main-content'); // Main content ko select karein
+
+        if (menuToggle && sidebar) {
+            menuToggle.addEventListener('click', (e) => { // 'e' add kiya
+                e.stopPropagation(); // <-- YEH HAI FIX
+                sidebar.classList.toggle('sidebar-visible');
+            });
+        }
+        
+        // Naya click-outside logic
+        if (mainContent && sidebar) {
+             mainContent.addEventListener('click', () => {
+                if (sidebar.classList.contains('sidebar-visible')) {
+                    sidebar.classList.remove('sidebar-visible');
+                }
+            });
+        }
+
+        // Basic Logout for this page
+         const logoutBtn = document.getElementById('logoutBtn');
+         if (logoutBtn) {
+             logoutBtn.addEventListener('click', (e) => {
+                 e.preventDefault();
+                 if (confirm("Are you sure you want to logout?")) {
+                     firebase.auth().signOut().then(() => { window.location.href = 'login.html'; });
+                 }
+             });
+         }
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Reports - Car Repair</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* ============================================= */
+        /* NAYA PROFESSIONAL REPORTS CSS */
+        /* ============================================= */
+
+        .report-container {
+            display: grid;
+            grid-template-columns: 300px 1fr; /* Nav thoda bada kiya */
+            gap: 20px;
+        }
+
+        .report-nav, .report-content {
+            background-color: var(--white-color);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+        }
+
+        .report-nav h3 {
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        /* Naya Accordion List Style */
+        .report-nav-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        /* Saal (Year) Item Style */
+        .year-item .year-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--dark-color);
+            border: 1px solid var(--border-color);
+        }
+        
+        .year-item .year-label:hover {
+            background-color: var(--light-color);
+        }
+
+        /* Arrow Icon (>) */
+        .year-arrow {
+            font-weight: 700;
+            transition: transform 0.3s ease;
+        }
+
+        /* Jab Year expand hoga (Arrow neeche) */
+        .year-item.expanded .year-arrow {
+            transform: rotate(90deg);
+        }
+        
+        /* Mahine (Month) ki list jo chhupi rahegi */
+        .month-list-nested {
+            list-style: none;
+            padding: 0;
+            margin-top: 5px;
+            margin-left: 20px; /* Indentation */
+            display: none; /* Default hidden */
+        }
+        
+        /* Jab Year expand hoga tab month list dikhegi */
+        .year-item.expanded .month-list-nested {
+            display: block;
+        }
+
+        /* Mahine (Month) ka Item Style */
+        .month-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        
+        .month-item:hover {
+            background-color: var(--light-color);
+            color: var(--primary-color);
+        }
+
+        .month-item.active {
+            background-color: var(--primary-color);
+            color: var(--white-color);
+            font-weight: 600;
+        }
+        
+        .invoice-count {
+            font-size: 0.9rem;
+            background-color: var(--border-color);
+            color: var(--grey-color);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+        .month-item.active .invoice-count {
+            background-color: var(--white-color);
+            color: var(--primary-color);
+        }
+
+        /* Right Side Content Area */
+        .report-content {
+            padding: 20px;
+        }
+        #reportTitle {
+            margin-top: 0;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+        .table-wrapper { 
+            overflow-x: auto; 
+        }
+        #invoiceListTable {
+            width: 100%;
+        }
+        /* Table row hover effect */
+        #invoiceListTableBody tr:hover {
+             background-color: var(--light-color);
+        }
+        
+        /* PDF Button Fix */
+        #invoiceListTableBody .btn-view-pdf {
+            padding: 5px 12px;
+            background-color: #17a2b8; /* Hardcoded color */
+            color: white;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 500;
+            display: inline-block;
+        }
+        #invoiceListTableBody .btn-view-pdf:hover {
+            opacity: 0.9;
+        }
+        
+        /* Professional Loading/Empty State */
+        .report-placeholder {
+            text-align: center;
+            padding: 60px 40px;
+            font-size: 1.1rem;
+            color: var(--grey-color);
+            background-color: var(--light-color);
+            border-radius: 6px;
+            border: 2px dashed var(--border-color);
+        }
+        #reportLoader {
+            /* Basic spinner */
+            display: none; /* JS se handle hoga */
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border-color);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        #reportEmpty {
+            display: none; /* JS se handle hoga */
+        }
+
+        /* Mobile layout */
+        @media (max-width: 992px) {
+            .report-container {
+                grid-template-columns: 1fr; /* Stack on mobile */
+            }
+        }
+    </style>
+
+     <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-firestore-compat.js"></script>
+
+    <script>
+      // ⚠️ IMPORTANT: Apna Firebase Config object yahaan paste karein
+      const firebaseConfig = {
+        apiKey: "AIzaSyCuejc7aR7-dLpcXh7uUTrWDsItWxQius8",
+        authDomain: "car-main-dashboard.firebaseapp.com",
+        projectId: "car-main-dashboard",
+        storageBucket: "car-main-dashboard.firebasestorage.app",
+        messagingSenderId: "574310288597",
+        appId: "1:574310288597:web:0859b5d5d453727fb2265c",
+        measurementId: "G-SMNFE0421H"
+      };
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore(); 
+    </script>
+    
+    <script src="auth-guard.js"></script>
+</head>
+<body>
+
+    <div class="container">
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h3>Car Repair Admin</h3>
+            </div>
+            <ul>
+                <li><a href="index.html">Dashboard</a></li>
+                <li><a href="create-invoice.html">Create Invoice</a></li>
+                <li><a href="manage-invoices.html">Manage Invoices</a></li>
+            
+                <li class="active"><a href="reports.html">Reports</a></li> <li><a href="#" id="logoutBtn">Logout</a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content">
+             <header class="main-header">
+                 <button class="menu-toggle" id="menuToggle">&#9776;</button>
+                 <h1>Invoice Reports</h1>
+            </header>
+            
+            <div class="report-container">
+                <nav class="report-nav">
+                    <h3>Browse by Period</h3>
+                    <ul class="report-nav-list" id="reportNavList">
+                        </ul>
+                </nav>
+
+                <section class="report-content">
+                    <h3 id="reportTitle">Select a Year & Month</h3>
+                    
+                    <div class="report-placeholder" id="reportPlaceholder">
+                        <div id="reportLoader"></div>
+                        <span id="reportMessage">Loading invoice data...</span>
+                    </div>
+
+                    <div class="table-wrapper" id="invoiceListContainer" style="display: none;">
+                        <table class="data-table" id="invoiceListTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Invoice #</th>
+                                    <th>Client Name</th>
+                                    <th>Phone No</th>
+                                    <th>View PDF</th>
+                                </tr>
+                            </thead>
+                            <tbody id="invoiceListTableBody">
+                                </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="reports.js"></script>
+
+    <script>
+        // Basic Hamburger Toggle for this page
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        if (menuToggle && sidebar) {
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('sidebar-visible');
+            });
+        }
+        // Basic Logout for this page
+         const logoutBtn = document.getElementById('logoutBtn');
+         if (logoutBtn) {
+             logoutBtn.addEventListener('click', (e) => {
+                 e.preventDefault();
+                 if (confirm("Are you sure you want to logout?")) {
+                     firebase.auth().signOut().then(() => { window.location.href = 'login.html'; });
+                 }
+             });
+         }
+    </script>
+</body> -->
+</html>
+
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Reports - Car Repair</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Reports page ke liye specific professional CSS */
+        .report-container {
+            display: grid;
+            grid-template-columns: 250px 1fr; /* Year/Month list aur Invoice list */
+            gap: 20px;
+        }
+
+        .report-nav, .report-content {
+            background-color: var(--white-color);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .report-nav {
+            padding: 20px;
+        }
+
+        .report-nav h3 {
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        /* Year aur Month ki list ke liye style */
+        .year-list, .month-list {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 20px;
+        }
+        .year-list li, .month-list li {
+            padding: 12px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease;
+            font-weight: 500;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .year-list li:hover, .month-list li:hover {
+            background-color: var(--light-color);
+            color: var(--primary-color);
+        }
+        .year-list li.active, .month-list li.active {
+            background-color: var(--primary-color);
+            color: var(--white-color);
+            font-weight: 600;
+        }
+        .month-list .invoice-count {
+            font-size: 0.9rem;
+            background-color: var(--border-color);
+            color: var(--grey-color);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+        .month-list li.active .invoice-count {
+            background-color: var(--white-color);
+            color: var(--primary-color);
+        }
+
+        /* Invoice list jo select karne par dikhegi */
+        .report-content {
+            padding: 20px;
+        }
+        #reportTitle {
+            margin-top: 0;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+        .table-wrapper { 
+            overflow-x: auto; 
+        }
+        #invoiceListTable {
+            width: 100%;
+        }
+        #invoiceListTableBody .btn-view-pdf {
+            padding: 5px 12px;
+            background-color: #17a2b8; /* Hardcoded color */
+            color: white;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 500;
+            display: inline-block;
+        }
+        #invoiceListTableBody .btn-view-pdf:hover {
+            opacity: 0.9;
+        }
+        
+        /* Loading/Empty State */
+        #reportLoader, #reportEmpty {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.1rem;
+            color: var(--grey-color);
+        }
+
+        /* Mobile layout */
+        @media (max-width: 992px) {
+            .report-container {
+                grid-template-columns: 1fr; /* Stack on mobile */
+            }
+        }
+    </style>
+
+     <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-firestore-compat.js"></script>
+
+    <script>
+      // ⚠️ IMPORTANT: Apna Firebase Config object yahaan paste karein
+      const firebaseConfig = {
+        apiKey: "AIzaSyCuejc7aR7-dLpcXh7uUTrWDsItWxQius8",
+        authDomain: "car-main-dashboard.firebaseapp.com",
+        projectId: "car-main-dashboard",
+        storageBucket: "car-main-dashboard.firebasestorage.app",
+        messagingSenderId: "574310288597",
+        appId: "1:574310288597:web:0859b5d5d453727fb2265c",
+        measurementId: "G-SMNFE0421H"
+      };
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore(); 
+    </script>
+    
+    <script src="auth-guard.js"></script>
+</head>
+<body>
+
+    <div class="container">
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h3>Car Repair Admin</h3>
+            </div>
+            <ul>
+                <li><a href="index.html">Dashboard</a></li>
+                <li><a href="create-invoice.html">Create Invoice</a></li>
+                <li><a href="manage-invoices.html">Manage Invoices</a></li>
+                <li class="active"><a href="reports.html">Reports</a></li> <li><a href="#" id="logoutBtn">Logout</a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content">
+             <header class="main-header">
+                 <button class="menu-toggle" id="menuToggle">&#9776;</button>
+                 <h1>Invoice Reports</h1>
+            </header>
+            
+            <div class="report-container">
+                <nav class="report-nav">
+                    <h3>Select Year</h3>
+                    <ul class="year-list" id="yearList">
+                        </ul>
+                    
+                    <h3 id="monthListTitle" style="display:none;">Select Month</h3>
+                    <ul class="month-list" id="monthList">
+                        </ul>
+                </nav>
+
+                <section class="report-content">
+                    <h3 id="reportTitle">Please select a year and month</h3>
+                    
+                    <div id="reportLoader" style="display: none;">Loading...</div>
+                    <div id="reportEmpty" style="display: none;">No invoices found for this period.</div>
+
+                    <div class="table-wrapper" id="invoiceListContainer" style="display: none;">
+                        <table class="data-table" id="invoiceListTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Invoice #</th>
+                                    <th>Client Name</th>
+                                    <th>Phone No</th>
+                                    <th>View PDF</th>
+                                </tr>
+                            </thead>
+                            <tbody id="invoiceListTableBody">
+                                </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="reports.js"></script>
+
+    <script>
+        // Basic Hamburger Toggle for this page
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        if (menuToggle && sidebar) {
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('sidebar-visible');
+            });
+        }
+        // Basic Logout for this page
+         const logoutBtn = document.getElementById('logoutBtn');
+         if (logoutBtn) {
+             logoutBtn.addEventListener('click', (e) => {
+                 e.preventDefault();
+                 if (confirm("Are you sure you want to logout?")) {
+                     firebase.auth().signOut().then(() => { window.location.href = 'login.html'; });
+                 }
+             });
+         }
+    </script>
+</body>
+</html> -->

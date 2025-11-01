@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Car Repair</title>
+    <link rel="stylesheet" href="style.css"> 
+    
+    <style>
+        /* style.css se font import ho jayega */
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            /* Naya dark background */
+            background-color: #1a1a1a; 
+            background-image: linear-gradient(180deg, #222 0%, #1a1a1a 100%);
+        }
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 30px;
+            
+            /* "Frosted Glass" / Glassmorphism effect */
+            background: rgba(30, 30, 30, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px; /* Thode zyada rounded corners */
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px); /* Safari support */
+            
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        .login-container h2 {
+            margin-bottom: 25px;
+            /* Title ko white kiya */
+            color: #ffffff; 
+            font-size: 1.8rem;
+        }
+        .form-group {
+            margin-bottom: 20px; /* Thodi zyada spacing */
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            /* Label text ko halka white kiya */
+            color: #e0e0e0; 
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px; /* Thodi behtar padding */
+            /* Input fields ko dark kiya */
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #555; /* Halka border */
+            border-radius: 8px; /* Thode rounded */
+            font-size: 16px;
+            color: #ffffff; /* Type karne wala text white */
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .form-group input:focus {
+            /* Focus par primary color (blue) ka glow */
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 10px rgba(52, 152, 219, 0.3);
+        }
+
+        /* Placeholder text ka color */
+        .form-group input::placeholder {
+            color: #888;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            /* Naya Gradient Background (Pink se Blue) */
+            background: linear-gradient(90deg, #E94057 0%, #1B76FF 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: opacity 0.3s ease;
+        }
+        .btn-login:disabled {
+             background: var(--grey-color);
+             cursor: not-allowed;
+             opacity: 0.7;
+        }
+        .btn-login:hover:not(:disabled) {
+            opacity: 0.9;
+        }
+        #loginError {
+            color: var(--danger-color);
+            margin-top: 15px;
+            font-weight: 600;
+            min-height: 1.2em; /* Prevent layout shift */
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="login-container">
+        <h2>Admin Login</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" required placeholder="Enter your email">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required placeholder="Enter your password">
+            </div>
+            
+            <button type="submit" id="loginButton" class="btn-login">Login &#10142;</button>
+            
+            <p id="loginError"></p>
+        </form>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-auth-compat.js"></script>
+
+    <script>
+      // ⚠️ IMPORTANT: Apna Firebase Config object yahaan paste karein
+      const firebaseConfig = {
+        apiKey: "AIzaSyCuejc7aR7-dLpcXh7uUTrWDsItWxQius8",
+        authDomain: "car-main-dashboard.firebaseapp.com",
+        projectId: "car-main-dashboard",
+        storageBucket: "car-main-dashboard.firebasestorage.app",
+        messagingSenderId: "574310288597",
+        appId: "1:574310288597:web:0859b5d5d453727fb2265c",
+        measurementId: "G-SMNFE0421H"
+      };
+      firebase.initializeApp(firebaseConfig);
+    </script>
+    
+    <script src="login.js"></script>
+</body>
+</html>

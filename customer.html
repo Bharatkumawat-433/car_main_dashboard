@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Customers - Car Repair</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .form-container, .table-container { background-color: var(--white-color); padding: 25px; border-radius: 8px; box-shadow: var(--shadow); margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 5px; }
+        .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-family: 'Poppins', sans-serif; }
+         .form-group textarea { resize: vertical; min-height: 60px;}
+        .btn-submit { padding: 12px 25px; font-size: 16px; cursor: pointer; border-radius: 5px; border: none; color: white; background-color: var(--primary-color); font-weight: 600; }
+        .btn-submit:disabled { background-color: var(--grey-color); cursor: not-allowed;}
+         #formMessage { margin-top: 10px; font-weight: 600;}
+         .table-wrapper { overflow-x: auto; } /* For responsive table */
+    </style>
+
+     <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-firestore-compat.js"></script>
+
+    <script>
+      // ⚠️ IMPORTANT: Apna Firebase Config object yahaan paste karein
+      const firebaseConfig = {
+  apiKey: "AIzaSyCuejc7aR7-dLpcXh7uUTrWDsItWxQius8",
+  authDomain: "car-main-dashboard.firebaseapp.com",
+  projectId: "car-main-dashboard",
+  storageBucket: "car-main-dashboard.firebasestorage.app",
+  messagingSenderId: "574310288597",
+  appId: "1:574310288597:web:0859b5d5d453727fb2265c",
+  measurementId: "G-SMNFE0421H"
+};
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore(); 
+    </script>
+    
+    <script src="auth-guard.js"></script>
+</head>
+<body>
+
+    <div class="container">
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h3>Car Repair Admin</h3>
+            </div>
+            <ul>
+                <li><a href="index.html">Dashboard</a></li>
+                <li><a href="create-invoice.html">Create Invoice</a></li>
+                <li><a href="manage-invoices.html">Manage Invoices</a></li>
+               
+                <li><a href="reports.html">Reports</a></li>
+                 <li><a href="#" id="logoutBtn">Logout</a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content"> <header class="main-header">
+                 <button class="menu-toggle" id="menuToggle">&#9776;</button>
+                 <h1>Manage Customers</h1>
+            </header>
+            
+            <div class="form-container">
+                <h3>Add New Customer</h3>
+                <form id="addClientForm">
+                    <div class="form-group">
+                        <label for="clientPhone">Client Phone Number (Unique ID)</label>
+                        <input type="tel" id="clientPhone" placeholder="9876543210" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="clientName">Client Name</label>
+                        <input type="text" id="clientName" placeholder="Ramesh Kumar" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="clientAddress">Address</label>
+                        <textarea id="clientAddress" placeholder="123, Main Road, Surat"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="clientState">State</label>
+                        <input type="text" id="clientState" value="Gujarat">
+                    </div>
+                    <div class="form-group">
+                        <label for="clientCode">State Code</label>
+                        <input type="text" id="clientCode" value="24">
+                    </div>
+                    <button type="submit" id="submitBtn" class="btn-submit">Add Customer</button>
+                    <p id="formMessage"></p>
+                </form>
+            </div>
+
+            <div class="table-container">
+                <h3>All Customers</h3>
+                 <div class="table-wrapper">
+                    <table class="data-table" id="customersTable">
+                        <thead>
+                            <tr>
+                                <th>Phone Number</th>
+                                <th>Name</th>
+                                <th>Address</th>
+                                <th>State</th>
+                                <th>Code</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customersTableBody">
+                            <tr><td colspan="5" style="text-align: center;">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                 </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="customers.js"></script>
+    
+    <script>
+        // Basic Hamburger Toggle for this page
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.querySelector('.main-content'); // Main content ko select karein
+        
+        if (menuToggle && sidebar) {
+            menuToggle.addEventListener('click', (e) => { // 'e' add kiya
+                e.stopPropagation(); // <-- YEH HAI FIX
+                sidebar.classList.toggle('sidebar-visible');
+            });
+        }
+        
+        // Naya click-outside logic
+        if (mainContent && sidebar) {
+             mainContent.addEventListener('click', () => {
+                if (sidebar.classList.contains('sidebar-visible')) {
+                    sidebar.classList.remove('sidebar-visible');
+                }
+            });
+        }
+
+        // Basic Logout for this page
+         const logoutBtn = document.getElementById('logoutBtn');
+         if (logoutBtn) {
+             logoutBtn.addEventListener('click', (e) => {
+                 e.preventDefault();
+                 if (confirm("Are you sure you want to logout?")) {
+                     firebase.auth().signOut().then(() => { window.location.href = 'login.html'; });
+                 }
+             });
+         }
+    </script>
+</body>
+</html>

@@ -1,0 +1,296 @@
+/* Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* ============================================= */
+/* NAYE PROFESSIONAL COLORS AUR STYLES */
+/* ============================================= */
+:root {
+    --primary-color: #3498db;  /* Thoda soft blue */
+    --dark-color: #2c3e50;     /* Rich navy blue sidebar ke liye */
+    --light-color: #f4f7f6;    /* Soft off-white background */
+    --grey-color: #7f8c8d;     /* Muted grey text ke liye */
+    --success-color: #27ae60;  /* Flat green */
+    --danger-color: #e74c3c;   /* Flat red */
+    --warning-color: #f39c12;  /* Flat yellow/orange */
+    --white-color: #ffffff;
+    --shadow: 0 5px 15px rgba(0,0,0,0.08); /* Thoda soft shadow */
+    --border-color: #ecf0f1;   /* Halka border */
+}
+
+/* Basic Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box; 
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--light-color);
+    color: var(--dark-color);
+    line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+a {
+    text-decoration: none;
+    color: var(--primary-color);
+}
+
+/* Main Layout (Dashboard) */
+.container {
+    display: grid;
+    grid-template-columns: 240px 1fr; /* Sidebar width aur main content */
+    min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    background-color: var(--dark-color);
+    color: var(--white-color);
+    padding: 20px 0; 
+    grid-column: 1 / 2;
+    grid-row: 1 / 2;
+    transition: transform 0.3s ease-in-out; 
+}
+
+.sidebar-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 0 20px 20px 20px;
+    border-bottom: 1px solid #34495e; /* Thoda dark border */
+}
+
+.sidebar-header h3 {
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+.sidebar ul {
+    list-style: none;
+}
+
+.sidebar ul li {
+    margin: 10px 15px; 
+}
+
+.sidebar ul li a {
+    display: block;
+    padding: 12px 15px;
+    color: var(--light-color);
+    border-radius: 8px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    font-weight: 500; /* Thoda mota font */
+}
+
+.sidebar ul li a:hover {
+    background-color: #34495e; /* Thoda dark hover */
+    color: var(--white-color);
+}
+
+.sidebar ul li.active a {
+    background-color: var(--primary-color);
+    font-weight: 600;
+    color: var(--white-color);
+}
+
+/* Main Content (Dashboard) */
+.main-content {
+    padding: 30px;
+    overflow-y: auto;
+    grid-column: 2 / 3;
+    grid-row: 1 / 2;
+}
+
+.main-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.menu-toggle {
+    display: none; /* Desktop par hide */
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    margin-right: 15px;
+    color: var(--dark-color);
+}
+
+
+/* Summary Cards */
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); /* Minimum size badhaya */
+    gap: 20px;
+    margin-top: 20px;
+    margin-bottom: 30px; /* Neeche space */
+}
+
+.card {
+    background-color: var(--white-color);
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color); /* Halka border */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1); /* Hover par thoda zyada shadow */
+}
+
+.card h4 {
+    color: var(--grey-color);
+    font-size: 1.1rem; /* Thoda bada */
+    font-weight: 500;
+    text-transform: uppercase; /* Uppercase */
+    letter-spacing: 0.5px; /* Letter spacing */
+}
+
+.card span {
+    font-size: 2.5rem; /* Thoda aur bada */
+    font-weight: 700;
+    color: var(--dark-color);
+    display: block;
+    margin-top: 8px;
+}
+
+/* Dashboard Sections */
+.dashboard-sections {
+    display: grid;
+    grid-template-columns: 1fr; /* Ab sirf ek column hai */
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.section-container {
+    background-color: var(--white-color);
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    overflow-x: auto;
+}
+
+.section-container h3 {
+    font-size: 1.4rem;
+    color: var(--dark-color);
+}
+
+/* Data Table (Recent Invoices) */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px; /* Thoda zyada margin */
+}
+
+.data-table th, .data-table td {
+    padding: 15px; /* Zyada padding */
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.data-table th {
+    background-color: var(--light-color);
+    font-weight: 600;
+    color: var(--dark-color); /* Dark text */
+    font-size: 14px;
+    text-transform: uppercase;
+}
+
+.data-table tbody tr:hover {
+    background-color: #fdfdfd;
+}
+
+/* Status Badges */
+.status {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--white-color);
+    letter-spacing: 0.5px;
+}
+.status-paid {
+    background-color: var(--success-color);
+}
+.status-unpaid {
+    background-color: var(--danger-color);
+}
+.status-partial {
+    background-color: var(--warning-color);
+    color: var(--white-color); /* White text */
+}
+
+/* Stock List (Yeh ab istemaal nahi ho raha, lekin style rakhte hain) */
+.stock-list {
+    list-style: none;
+    margin-top: 15px;
+}
+.stock-list li {
+    padding: 12px 5px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.stock-list li:last-child {
+    border-bottom: none;
+}
+.stock-list li .stock-name {
+    font-weight: 600;
+    color: var(--dark-color);
+}
+.stock-list li .stock-qty {
+    font-weight: 700;
+    color: var(--danger-color);
+    background-color: #fbe9e7;
+    padding: 3px 8px;
+    border-radius: 5px;
+}
+
+
+/* Responsive (Mobile-Friendly) Logic */
+@media (max-width: 992px) {
+    .container {
+        grid-template-columns: 1fr; /* Full width content */
+    }
+    
+    .sidebar {
+        position: fixed; /* Content ke oopar float hoga */
+        left: 0;
+        top: 0;
+        height: 100vh;
+        z-index: 1000; /* Sabse oopar */
+        transform: translateX(-100%); /* Screen se bahar (left mein) */
+    }
+    
+    .sidebar.sidebar-visible {
+        transform: translateX(0); /* Screen par waapas layega */
+    }
+    
+    .main-content {
+        grid-column: 1 / -1; /* Poori width lega */
+        padding: 20px; /* Thodi kam padding */
+    }
+
+    .main-header h1 {
+        font-size: 1.5rem; /* Mobile par chhota header */
+    }
+    
+    .menu-toggle {
+        display: block; /* Hamburger button dikhao */
+    }
+    
+    .dashboard-sections {
+        grid-template-columns: 1fr; /* Sections ko ek ke neeche ek rakho */
+    }
+}
