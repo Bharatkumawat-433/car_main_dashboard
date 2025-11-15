@@ -14,6 +14,9 @@
             margin: 0;
             padding: 20px;
             background-color: #f4f4f4;
+            /* NAYA: Font boosting ko rokein */
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
         }
         
         .invoice-container {
@@ -58,7 +61,7 @@
 
         .section-title {
             font-weight: bold;
-            font-size: 18px;
+            font-size: 18px; /* Aapka change */
         }
         .align-right {
             text-align: right;
@@ -68,7 +71,7 @@
         }
         .items-table-header th {
             text-align: center;
-            background-color: #ffffff;
+            background-color: #ffffff; /* Aapka change */
         }
         .total-amount-row td {
             font-weight: bold;
@@ -164,7 +167,7 @@
         .action-buttons button {
             padding: 10px 20px;
             font-size: 16px;
-            margin: 5px; /* Margin update kiya */
+            margin: 5px; /* Aapka change */
             cursor: pointer;
             border-radius: 5px;
             border: none;
@@ -190,156 +193,89 @@
             background-color: #25D366; 
         }
 
-        /* ============================================= */
-        /* NAYA: CUSTOM POP-UP MODAL CSS */
-        /* ============================================= */
+        /* Pop-up Modals CSS */
         .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            display: none; /* Default hidden */
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            font-family: 'Poppins', sans-serif, Arial; /* Poppins font add kiya */
-        }
-        .modal-content {
-            background: #ffffff;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-            width: 100%;
-            max-width: 400px;
-            opacity: 0;
-            transform: translateY(-20px);
-            transition: opacity 0.3s ease, transform 0.3s ease;
-        }
-        /* Modal ko dikhane ke liye 'visible' class */
-        .modal-overlay.visible {
-            display: flex;
-        }
-        .modal-overlay.visible .modal-content {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        .modal-content h3 {
-            margin-top: 0;
-            color: var(--dark-color);
-            font-size: 22px;
-        }
-        .modal-content p {
-            font-size: 15px;
-            color: var(--grey-color);
-            margin-bottom: 15px;
-            line-height: 1.5;
-        }
-        .modal-input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6); display: none;
+            justify-content: center; align-items: center; z-index: 1000;
             font-family: 'Poppins', sans-serif, Arial;
         }
+        .modal-content {
+            background: #ffffff; padding: 25px; border-radius: 8px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2); width: 100%; max-width: 400px;
+            opacity: 0; transform: translateY(-20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .modal-overlay.visible { display: flex; }
+        .modal-overlay.visible .modal-content { opacity: 1; transform: translateY(0); }
+        .modal-content h3 { margin-top: 0; color: var(--dark-color); font-size: 22px; }
+        .modal-content p { font-size: 15px; color: var(--grey-color); margin-bottom: 15px; line-height: 1.5; }
+        .modal-input {
+            width: 100%; padding: 12px; border: 1px solid #ccc;
+            border-radius: 5px; font-size: 16px; font-family: 'Poppins', sans-serif, Arial;
+        }
         .modal-input:focus {
-            outline: none;
-            border-color: var(--primary-color);
+            outline: none; border-color: var(--primary-color);
             box-shadow: 0 0 5px rgba(0,123,255,0.3);
         }
-        .modal-buttons {
-            margin-top: 20px;
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-        }
-        .modal-btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: background-color 0.2s ease;
-        }
-        .modal-btn-send {
-            background-color: var(--primary-color);
-            color: white;
-        }
-        .modal-btn-send:hover {
-            background-color: #0056b3;
-        }
-        .modal-btn-send:disabled {
-            background-color: var(--grey-color);
-            cursor: not-allowed;
-        }
-        .modal-btn-cancel {
-            background-color: #f1f1f1;
-            color: var(--dark-color);
-        }
-        .modal-btn-cancel:hover {
-            background-color: #e0e0e0;
-        }
+        .modal-buttons { margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px; }
+        .modal-btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: 600; transition: background-color 0.2s ease; }
+        .modal-btn-send { background-color: var(--primary-color); color: white; }
+        .modal-btn-send:hover { background-color: #0056b3; }
+        .modal-btn-send:disabled { background-color: var(--grey-color); cursor: not-allowed; }
+        .modal-btn-cancel { background-color: #f1f1f1; color: var(--dark-color); }
+        .modal-btn-cancel:hover { background-color: #e0e0e0; }
+        .modal-success-content { text-align: center; padding: 30px 25px; }
+        .modal-icon-container { width: 70px; height: 70px; border-radius: 50%; margin: 0 auto 20px auto; display: flex; justify-content: center; align-items: center; background-color: #E8F5E9; }
+        .modal-icon-container svg { width: 40px; height: 40px; stroke: #4CAF50; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; fill: none; stroke-dasharray: 48; stroke-dashoffset: 48; animation: draw-check-animation 0.5s 0.2s ease-out forwards; }
+        @keyframes draw-check-animation { from { stroke-dashoffset: 48; } to { stroke-dashoffset: 0; } }
+        #modalSuccessTitle { color: #388E3C; font-size: 24px; margin-bottom: 10px; }
+        #modalSuccessMessage { font-size: 16px; color: var(--grey-color); }
+        .modal-success-content .modal-buttons { justify-content: center; }
+        .modal-success-content .modal-btn-send { background-color: #4CAF50; }
+        .modal-success-content .modal-btn-send:hover { background-color: #388E3C; }
 
-        /* Success Modal (Green Checkmark) Styles */
-        .modal-success-content {
-            text-align: center;
-            padding: 30px 25px;
-        }
-        .modal-icon-container {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            margin: 0 auto 20px auto;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #E8F5E9; /* Light green */
-        }
-        .modal-icon-container svg {
-            width: 40px;
-            height: 40px;
-            stroke: #4CAF50; /* Dark green */
-            stroke-width: 4;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-            fill: none;
-            /* Animation ke liye */
-            stroke-dasharray: 48;
-            stroke-dashoffset: 48;
-            animation: draw-check-animation 0.5s 0.2s ease-out forwards;
-        }
-        /* Checkmark animation */
-        @keyframes draw-check-animation {
-            from {
-                stroke-dashoffset: 48;
+        /* ============================================= */
+        /* NAYA: RESPONSIVE CSS (GST INVOICE KE LIYE) */
+        /* ============================================= */
+        @media (max-width: 820px) { /* 800px + padding */
+            body {
+                padding: 5px; /* Mobile par kam padding */
             }
-            to {
-                stroke-dashoffset: 0;
+            .invoice-container {
+                width: 100%; /* Poori width lo */
+                margin: 5px auto;
+                padding: 10px;
+                box-shadow: none; /* Shadow hata do */
+                border: 1px solid #ccc;
             }
-        }
-        #modalSuccessTitle {
-            color: #388E3C; /* Darker Green */
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
-        #modalSuccessMessage {
-            font-size: 16px;
-            color: var(--grey-color);
-        }
-        .modal-success-content .modal-buttons {
-            justify-content: center;
-        }
-        .modal-success-content .modal-btn-send {
-             background-color: #4CAF50; /* Green OK button */
-        }
-        .modal-success-content .modal-btn-send:hover {
-             background-color: #388E3C;
+            .action-buttons button {
+                padding: 10px;
+                font-size: 14px;
+                margin: 5px;
+            }
+            /* Font size ko consistent rakho */
+            body, table, input, textarea {
+                font-size: 12px; /* Mobile par thoda chhota font */
+            }
+            #invoiceDate {
+                 font-size: 14px; /* Date thodi badi */
+            }
+            .section-title {
+                 font-size: 14px;
+            }
+            td, th {
+                padding: 5px; /* Cell padding kam karo */
+            }
+            .header-section .right-details td div {
+                padding: 5px;
+            }
+            /* Bank details font ko bhi control karo */
+            .declaration-section div {
+                font-size: 12px !important; 
+            }
         }
         /* ============================================= */
-
 
         /* Print Styles */
         @media print {
@@ -361,7 +297,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-functions-compat.js"></script>
 
     <script>
-      // ⚠️ IMPORTANT: Apna Firebase Config object yahaan paste karein
       const firebaseConfig = {
         apiKey: "AIzaSyCuejc7aR7-dLpcXh7uUTrWDsItWxQius8",
         authDomain: "car-main-dashboard.firebaseapp.com",
@@ -374,7 +309,6 @@
       firebase.initializeApp(firebaseConfig);
       const db = firebase.firestore();
       const storage = firebase.storage();
-      // FUNCTIONS KO INITIALIZE KIYA HAI
       const functions = firebase.functions(); 
     </script>
     
@@ -390,7 +324,7 @@
             <tr>
                 <td style="width: 50%;">
                     <div> <span class="section-title">Alankar Car Décor</span><br> Shop No.4, Dhruvi Mall, College Road, Gohar Baug,<br> Near Honest, Bilimora - 396321<br> GSTIN : 24AOHPJ2421H1ZD <br>Phone No : 7874879799  <br> State : GUJARAT &emsp; &emsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Code: 24 
-                </div> 
+                    </div> 
                 </td>
                 
                 <td style="padding: 0; height: 100%;">
@@ -427,8 +361,6 @@
                             <label style="width: 100px; font-weight: bold;">Phone No :</label>
                             <input type="text" id="clientPhoneInput" class="buyer-input" style="flex-grow: 1;">
                         </div>
-
-                        
 
                         <div style="display: flex;">
                             <label style="width: 100px; font-weight: bold;">Address :</label>
@@ -526,7 +458,7 @@
 
 <div class="modal-overlay" id="successModalOverlay">
     <div class="modal-content modal-success-content">
-        <div class="modal-icon-container">
+        <div class="modal-icon-container success">
             <svg viewBox="0 0 50 50">
                 <path fill="transparent" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
             </svg>
@@ -538,13 +470,12 @@
         </div>
     </div>
 </div>
-
 <script>
     const { jsPDF } = window.jspdf;
     let roundedGrandTotal = 0; 
-    let savedInvoiceData = null; // Store saved invoice data for emailing
+    let savedInvoiceData = null; 
 
-    // Function to save invoice data and PDF
+    // Function to save invoice data and PDF (GST VERSION)
     async function saveAndDownloadPDF() {
         const downloadBtn = document.getElementById('downloadBtn');
         const emailBtn = document.getElementById('emailBtn');
@@ -563,6 +494,7 @@
 
         const invoiceElement = document.getElementById('invoiceToPrint');
         
+        // YEH AAPKA GST WALA FORM HAI
         const clientName = document.getElementById('billToName').value.trim() || 'N/A';
         const clientPhone = document.getElementById('clientPhoneInput').value.trim() || 'N/A';
         const clientGstin = document.getElementById('clientGstinInput').value.trim() || ''; 
@@ -612,6 +544,7 @@
             
             const pdfBlob = pdf.output('blob');
             
+            // YEH GST VERSION HAI, ISLIYE STORAGE MEIN UPLOAD KAREGA
             console.log("Uploading PDF to Firebase Storage...");
             const storageRef = storage.ref(`invoices/${fileName}`);
             const uploadTask = await storageRef.put(pdfBlob);
@@ -631,10 +564,11 @@
                 invoiceDate: invoiceDateValue,
                 grandTotal: roundedGrandTotal, 
                 status: 'Unpaid', 
-                pdfUrl: downloadURL,
+                pdfUrl: downloadURL, // PDF URL save karega
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             };
             
+            // YEH 'invoices' COLLECTION MEIN SAVE KAREGA
             console.log("Saving invoice data to Firestore...");
             await db.collection("invoices").doc(invoiceNumber).set(payload, { merge: true });
             console.log("Firestore save successful.");
@@ -643,9 +577,6 @@
             pdf.save(`${invoiceNumber}.pdf`); 
             emailBtn.disabled = false; 
 
-            // =============================================
-            // 'alert' KO NAYE MODAL SE BADLA GAYA HAI
-            // =============================================
             showSuccessModal('Saved Successfully!', `Invoice ${invoiceNumber} has been saved and downloaded.`);
 
         } catch (error) {
@@ -670,30 +601,24 @@
         }
     }
 
-    // =================================================================
-    // SEND EMAIL FUNCTION - Ab yeh modal dikhayega
-    // =================================================================
+    // SEND EMAIL FUNCTION (GST VERSION)
     async function sendInvoiceEmail() {
         if (!savedInvoiceData || !savedInvoiceData.pdfUrl) {
-            // 'alert' KO NAYE MODAL SE BADLA GAYA HAI
             showSuccessModal('Error!', 'Invoice data or PDF URL is missing. Please save the invoice again.');
             document.getElementById('emailBtn').disabled = true; 
             return;
         }
-        // 'prompt' ki jagah, modal dikhao
         showEmailModal();
     }
 
-    // =================================================================
-    // NAYA: MODAL HELPER FUNCTIONS
-    // =================================================================
+    // MODAL HELPER FUNCTIONS
     function showEmailModal() {
         const modalOverlay = document.getElementById('emailModalOverlay');
         const modalInvoiceSpan = document.getElementById('modalInvoiceNumber');
         if (modalOverlay && savedInvoiceData) {
             modalInvoiceSpan.innerText = savedInvoiceData.invoiceNo || 'N/A';
             document.getElementById('clientEmailInputModal').value = ''; 
-            modalOverlay.classList.add('visible'); // Modal dikhayein
+            modalOverlay.classList.add('visible'); 
             document.getElementById('clientEmailInputModal').focus(); 
         }
     }
@@ -701,7 +626,7 @@
     function hideEmailModal() {
         const modalOverlay = document.getElementById('emailModalOverlay');
         if (modalOverlay) {
-            modalOverlay.classList.remove('visible'); // Modal chhupayein
+            modalOverlay.classList.remove('visible'); 
         }
     }
 
@@ -710,14 +635,13 @@
         if (modalOverlay) {
             document.getElementById('modalSuccessTitle').innerText = title;
             document.getElementById('modalSuccessMessage').innerText = message;
-            modalOverlay.classList.add('visible'); // Modal dikhayein
+            modalOverlay.classList.add('visible'); 
             
-            // Checkmark animation ko reset/restart karein
             const checkIconPath = modalOverlay.querySelector('.modal-icon-container svg path');
             if (checkIconPath) {
-                checkIconPath.style.animation = 'none'; // Animation hatayein
-                checkIconPath.getBoundingClientRect(); // Reflow trigger karein
-                checkIconPath.style.animation = 'draw-check-animation 0.5s 0.2s ease-out forwards'; // Animation waapis lagayein
+                checkIconPath.style.animation = 'none'; 
+                checkIconPath.getBoundingClientRect(); 
+                checkIconPath.style.animation = 'draw-check-animation 0.5s 0.2s ease-out forwards'; 
             }
         }
     }
@@ -725,17 +649,16 @@
     function hideSuccessModal() {
          const modalOverlay = document.getElementById('successModalOverlay');
          if (modalOverlay) {
-            modalOverlay.classList.remove('visible'); // Modal chhupayein
+            modalOverlay.classList.remove('visible'); 
          }
     }
 
-    // NAYA: Modal ka "Send" button handle karne ke liye
     async function handleModalSend() {
         const clientEmailInput = document.getElementById('clientEmailInputModal');
         const clientEmail = clientEmailInput.value.trim();
 
         if (!clientEmail || !clientEmail.includes('@')) { 
-            alert("Please enter a valid email address."); // Yahaan chhota alert theek hai
+            alert("Please enter a valid email address.");
             return;
         }
         
@@ -762,30 +685,21 @@
 
             console.log("Function response:", result.data.message);
             
-            // =============================================
-            // 'alert' KO NAYE MODAL SE BADLA GAYA HAI
-            // =============================================
-            hideEmailModal(); // Pehle input modal band karein
-            showSuccessModal('Email Sent!', result.data.message); // Fir success modal dikhayein
+            hideEmailModal(); 
+            showSuccessModal('Email Sent!', result.data.message); 
 
         } catch (error) {
             console.error("Error calling email function: ", error);
-            // Error ke liye standard alert theek hai
             alert("Error sending email: " + error.message + ". Check console.");
         } finally {
-            // Button ko re-enable karein
             modalSendBtn.disabled = false;
             modalSendBtn.innerText = 'Send';
         }
     }
-    // =================================================================
 
-
-    // =================================================================
-    // WHATSAPP FUNCTION - Aapke reference se
-    // =================================================================
+    // WHATSAPP FUNCTION
     function openWhatsAppChat() {
-        const mobileInput = document.getElementById('clientPhoneInput'); // Sahi ID
+        const mobileInput = document.getElementById('clientPhoneInput'); 
         let clientNumber = mobileInput.value.trim();
 
         if (clientNumber === "") {
@@ -809,7 +723,6 @@
         if (typeof db === 'undefined' || typeof storage === 'undefined' || typeof firebase === 'undefined' || typeof firebase.auth === 'undefined' || typeof functions === 'undefined') {
             console.error("Firebase services (db, storage, auth, functions) not initialized. Check config and SDKs.");
             alert("Application Error: Firebase services failed to load. Please refresh or check configuration.");
-            // Sabhi buttons disable karein
             ['dashboardBtn', 'viewBtn', 'downloadBtn', 'emailBtn', 'whatsappBtn'].forEach(id => {
                 const btn = document.getElementById(id);
                 if (btn) btn.disabled = true;
@@ -817,22 +730,21 @@
             return; 
         }
 
-        // Auth check happens via auth-guard.js included in <head>
+        // Auth check
+        // ... (auth-guard.js handles this) ...
 
         // Button event listeners
         document.getElementById('dashboardBtn').addEventListener('click', () => { window.location.href = 'index.html'; });
         document.getElementById('viewBtn').addEventListener('click', () => window.print());
         document.getElementById('downloadBtn').addEventListener('click', saveAndDownloadPDF);
         document.getElementById('emailBtn').addEventListener('click', sendInvoiceEmail);
-        document.getElementById('whatsappBtn').addEventListener('click', openWhatsAppChat); // WhatsApp listener
+        document.getElementById('whatsappBtn').addEventListener('click', openWhatsAppChat); 
 
         // Item row listeners
         document.getElementById('addRowBtn').addEventListener('click', addRow);
         document.getElementById('removeRowBtn').addEventListener('click', removeRow);
         
-        // =============================================
-        // NAYA: MODAL EVENT LISTENERS
-        // =============================================
+        // MODAL EVENT LISTENERS
         const modalSendBtn = document.getElementById('modalSendBtn');
         const modalCancelBtn = document.getElementById('modalCancelBtn');
         const emailModalOverlay = document.getElementById('emailModalOverlay');
@@ -846,14 +758,12 @@
                 if (e.target === emailModalOverlay) hideEmailModal();
             });
         }
-        // Success modal listeners
         if (modalOkBtn) modalOkBtn.addEventListener('click', hideSuccessModal);
         if (successModalOverlay) {
              successModalOverlay.addEventListener('click', (e) => {
                 if (e.target === successModalOverlay) hideSuccessModal();
             });
         }
-        // =============================================
         
         // Set today's date
         const today = new Date();
@@ -878,7 +788,7 @@
         calculateInvoice();
     });
     
-    // --- Calculation and Row Functions (Aapke naye columns ke saath) ---
+    // --- Calculation and Row Functions (GST Version) ---
     const taxRate = 0.09; // 9%
     let itemCounter = document.querySelectorAll('#invoiceTableBody .item-row').length;
 
@@ -953,6 +863,7 @@
         return 'INR ' + words.trim() + ' Only';
     }
 
+    // CALCULATE INVOICE (GST VERSION)
     function calculateInvoice() {
         let totalTaxableValue = 0; 
         let totalQuantity = 0; 
@@ -965,7 +876,7 @@
 
         itemRows.forEach(row => {
             const quantityInput = row.querySelector('.quantity-input');
-            const rateInput = row.querySelector('.discounted-rate-input'); // Calculation discounted rate se
+            const rateInput = row.querySelector('.discounted-rate-input'); 
             const amountCell = row.querySelector('.amount-cell');
             
             const quantity = sanitizeInput(quantityInput.value); 
@@ -978,7 +889,7 @@
             totalQuantity += quantity; 
         });
 
-        // Calculate Taxes
+        // Calculate Taxes (Yeh GST version hai)
         const cgst = totalTaxableValue * taxRate; 
         const sgst = totalTaxableValue * taxRate; 
         const totalTaxAmount = cgst + sgst;
@@ -988,7 +899,7 @@
         roundedGrandTotal = Math.round(grandTotalWithoutRounding); 
         const roundOff = roundedGrandTotal - grandTotalWithoutRounding;
 
-        // Update Footer Values
+        // Update Footer Values (GST Version)
         document.getElementById('totalTaxableValue').innerText = formatNumber(totalTaxableValue); 
         document.getElementById('outputCGST').innerText = formatNumber(cgst); 
         document.getElementById('outputSGST').innerText = formatNumber(sgst); 
@@ -998,6 +909,7 @@
         document.getElementById('amountInWords').innerHTML = `<span class="section-title">Amount Chargeable (in words)</span><br>${convertAmountToWords(roundedGrandTotal)}`; 
     }
     
+    // ADD ROW (GST Version)
     function addRow() {
         const tableBody = document.getElementById('invoiceTableBody'); 
         const newRow = document.createElement('tr'); 
@@ -1006,7 +918,7 @@
         newRow.innerHTML = ` 
             <td class="align-center">${itemCounter}</td> 
             <td colspan="2"><input type="text" class="description-input" placeholder="Service or Part"></td> 
-            <td class="align-right"><input type="text" class="quantity-input" value="1" style="text-align: center;"></td> 
+            <td class="align-center"><input type="text" class="quantity-input" value="1" style="text-align: center;"></td> 
             <td class="align-right"><input type="text" class="actual-rate-input" placeholder="0.00"></td> 
             <td class="align-right"><input type="text" class="discounted-rate-input" placeholder="0.00"></td> 
             <td class="align-center"><input type="text" class="per-input" value="Pcs"></td> 
@@ -1039,6 +951,8 @@
 
 </body>
 </html>
+
+
 
 
 
