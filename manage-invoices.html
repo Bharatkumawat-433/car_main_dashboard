@@ -7,69 +7,94 @@
     <link rel="stylesheet" href="style.css">
     <style>
         .table-container { 
-            background-color: var(--white-color); 
-            padding: 25px; 
-            border-radius: 8px; 
-            box-shadow: var(--shadow); 
-            margin-bottom: 20px; 
+            background-color: var(--white-color); padding: 25px; border-radius: 8px; 
+            box-shadow: var(--shadow); margin-bottom: 20px; 
         }
-        .table-wrapper { 
-            overflow-x: auto; 
-        }
-        .search-container {
-            margin-bottom: 20px;
-            display: flex;
-            gap: 10px;
-        }
+        .table-wrapper { overflow-x: auto; }
+        .search-container { margin-bottom: 20px; display: flex; gap: 10px; }
         #searchInput {
-            flex-grow: 1;
-            padding: 10px 15px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
+            flex-grow: 1; padding: 10px 15px; border: 1px solid #ccc;
+            border-radius: 5px; font-size: 16px;
         }
         .status-select {
-            padding: 5px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
+            padding: 5px; border-radius: 5px; border: 1px solid #ccc;
+            font-family: 'Poppins', sans-serif; font-weight: 600;
         }
         .status-select.status-paid {
-            background-color: var(--success-color);
-            color: white;
-            border-color: var(--success-color);
+            background-color: var(--success-color); color: white; border-color: var(--success-color);
         }
         .status-select.status-unpaid {
-            background-color: var(--danger-color);
-            color: white;
-            border-color: var(--danger-color);
-        }
-        .status-select.status-partial {
-            background-color: var(--warning-color);
-            color: var(--dark-color);
-            border-color: var(--warning-color);
+            background-color: var(--danger-color); color: white; border-color: var(--danger-color);
         }
         .btn-view-pdf {
-            padding: 5px 12px;
-            background-color: #17a2b8; /* Fix */
-            color: white;
-            border-radius: 5px;
-            font-size: 14px;
-            font-weight: 500;
-            display: inline-block;
+            padding: 5px 12px; background-color: #17a2b8; color: white;
+            border-radius: 5px; font-size: 14px; font-weight: 500;
+            display: inline-block; margin-right: 5px;
         }
-         .btn-view-pdf:hover {
-            opacity: 0.9;
-         }
+         .btn-view-pdf:hover { opacity: 0.9; }
+        .btn-delete {
+            padding: 5px 12px; background-color: var(--danger-color); color: white;
+            border-radius: 5px; font-size: 14px; font-weight: 500;
+            display: inline-block; cursor: pointer; border: none;
+        }
+        .btn-delete:hover { opacity: 0.9; }
+
+        /* POP-UP MODALS CSS */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6); display: none;
+            justify-content: center; align-items: center; z-index: 1000;
+            font-family: 'Poppins', sans-serif, Arial;
+        }
+        .modal-content {
+            background: #ffffff; padding: 25px; border-radius: 8px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2); width: 100%; max-width: 400px;
+            opacity: 0; transform: translateY(-20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .modal-overlay.visible { display: flex; }
+        .modal-overlay.visible .modal-content { opacity: 1; transform: translateY(0); }
+        .modal-content h3 { margin-top: 0; color: var(--dark-color); font-size: 22px; }
+        .modal-content p { font-size: 15px; color: var(--grey-color); margin-bottom: 15px; line-height: 1.5; }
+        .modal-buttons { margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px; }
+        .modal-btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: 600; transition: background-color 0.2s ease; }
+        .modal-btn-send { background-color: var(--primary-color); color: white; }
+        .modal-btn-send:hover { background-color: #0056b3; }
+        .modal-btn-cancel { background-color: #f1f1f1; color: var(--dark-color); }
+        .modal-btn-cancel:hover { background-color: #e0e0e0; }
+        
+        .modal-success-content { text-align: center; padding: 30px 25px; }
+        .modal-icon-container { width: 70px; height: 70px; border-radius: 50%; margin: 0 auto 20px auto; display: flex; justify-content: center; align-items: center; }
+        .modal-icon-container svg { width: 40px; height: 40px; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+        
+        .modal-icon-container.success { background-color: #E8F5E9; }
+        .modal-icon-container.success svg { stroke: #4CAF50; }
+        #modalSuccessTitle { color: #388E3C; font-size: 24px; margin-bottom: 10px; }
+        .modal-success-content .modal-btn-send { background-color: #4CAF50; }
+        .modal-success-content .modal-btn-send:hover { background-color: #388E3C; }
+
+        .modal-confirm-content { text-align: center; padding: 30px 25px; }
+        .modal-icon-container.warning { background-color: #FFEBEE; } 
+        .modal-icon-container.warning svg { stroke: var(--danger-color); } 
+        #modalConfirmTitle { color: var(--danger-color); font-size: 24px; margin-bottom: 10px; }
+        
+        .modal-btn-delete { background-color: var(--danger-color); color: white; }
+        .modal-btn-delete:hover { background-color: #c0392b; }
+        .modal-btn-delete:disabled { background-color: var(--grey-color); cursor: not-allowed; }
+
+        .modal-icon-container svg path {
+            stroke-dasharray: 48; stroke-dashoffset: 48;
+            animation: draw-check-animation 0.5s 0.2s ease-out forwards;
+        }
+        @keyframes draw-check-animation { from { stroke-dashoffset: 48; } to { stroke-dashoffset: 0; } }
     </style>
 
      <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-storage-compat.js"></script>
 
     <script>
-      // ⚠️ IMPORTANT: Apna Firebase Config object yahaan paste karein
       const firebaseConfig = {
         apiKey: "AIzaSyCuejc7aR7-dLpcXh7uUTrWDsItWxQius8",
         authDomain: "car-main-dashboard.firebaseapp.com",
@@ -81,6 +106,7 @@
       };
       firebase.initializeApp(firebaseConfig);
       const db = firebase.firestore(); 
+      const storage = firebase.storage(); 
     </script>
     
     <script src="auth-guard.js"></script>
@@ -92,19 +118,22 @@
             <div class="sidebar-header">
                 <h3>Car Repair Admin</h3>
             </div>
-            <ul>
-                <li><a href="index.html">Dashboard</a></li>
-                <li><a href="create-invoice.html">Create Invoice</a></li>
-                <li class="active"><a href="manage-invoices.html">Manage Invoices</a></li>
-            
-                <li><a href="reports.html">Reports</a></li>
-                 <li><a href="#" id="logoutBtn">Logout</a></li>
-            </ul>
-        </nav>
+             <ul>
+        <li class="active"><a href="index.html">Dashboard</a></li>
+        <li><a href="create-invoice.html">Create Invoice (GST)</a></li>
+        <li><a href="manage-invoices.html">Manage Invoices (GST)</a></li>
+        <li><a href="reports.html">Reports (GST)</a></li>
+        <li><a href="create-invoice-simple.html">Create Invoice</a></li>
+        <li><a href="manage-simple-invoices.html">Manage Invoices</a></li>
+        <li><a href="reports-simple.html">Reports</a></li>
+        <li><a href="#" id="logoutBtn">Logout</a></li> 
+    </ul>
+</nav>
 
-        <main class="main-content"> <header class="main-header">
+        <main class="main-content">
+             <header class="main-header">
                  <button class="menu-toggle" id="menuToggle">&#9776;</button>
-                 <h1>Manage All Invoices</h1>
+                 <h1>Manage All GST Invoices</h1>
             </header>
             
             <div class="search-container">
@@ -112,7 +141,7 @@
             </div>
 
             <div class="table-container">
-                <h3>All Invoices</h3>
+                <h3>All GST Invoices</h3>
                  <div class="table-wrapper">
                     <table class="data-table" id="invoicesTable">
                         <thead>
@@ -123,7 +152,7 @@
                                 <th>Phone</th>
                                 <th>Amount</th>
                                 <th>Status</th>
-                                <th>View PDF</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="invoicesTableBody">
@@ -132,17 +161,60 @@
                     </table>
                  </div>
             </div>
-
         </main>
     </div>
 
+    <div class="modal-overlay" id="successModalOverlay">
+        <div class="modal-content modal-success-content">
+            <div class="modal-icon-container success">
+                <svg viewBox="0 0 50 50">
+                    <path fill="transparent" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                </svg>
+            </div>
+            <h3 id="modalSuccessTitle">Success!</h3>
+            <p id="modalSuccessMessage">Your action was completed successfully.</p>
+            <div class="modal-buttons">
+                <button type="button" id="modalOkBtn" class="modal-btn modal-btn-send">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="confirmModalOverlay">
+        <div class="modal-content modal-confirm-content">
+            <div class="modal-icon-container warning">
+                <svg viewBox="0 0 50 50">
+                    <path fill="transparent" d="M25 10 L25 30 M25 38 L25 40" />
+                </svg>
+            </div>
+            <h3 id="modalConfirmTitle">Are you sure?</h3>
+            <p id="modalConfirmMessage">Do you really want to delete this invoice? This action cannot be undone.</p>
+            <div class="modal-buttons">
+                <button type="button" id="modalConfirmCancelBtn" class="modal-btn modal-btn-cancel">Cancel</button>
+                <button type="button" id="modalConfirmDeleteBtn" class="modal-btn modal-btn-delete">Delete</button>
+            </div>
+        </div>
+    </div>
+
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            if (typeof db === 'undefined') {
-                console.error("Firestore (db) is not initialized. Check Firebase config.");
+            if (typeof db === 'undefined' || typeof storage === 'undefined') {
+                console.error("Firestore (db) or Storage is not initialized.");
                 document.getElementById('invoicesTableBody').innerHTML = '<tr><td colspan="7" style="text-align: center; color: red;">App config error.</td></tr>';
                 return;
             }
+
+            // Modal elements ko select karein
+            const successModalOverlay = document.getElementById('successModalOverlay');
+            const modalSuccessTitle = document.getElementById('modalSuccessTitle');
+            const modalSuccessMessage = document.getElementById('modalSuccessMessage');
+            const modalOkBtn = document.getElementById('modalOkBtn');
+            
+            const confirmModalOverlay = document.getElementById('confirmModalOverlay');
+            const modalConfirmMessage = document.getElementById('modalConfirmMessage');
+            const modalConfirmCancelBtn = document.getElementById('modalConfirmCancelBtn');
+            // 'const' se 'let' kiya taaki hum ise safely re-create kar sakein
+            let modalConfirmDeleteBtn = document.getElementById('modalConfirmDeleteBtn'); 
 
             let allInvoices = [];
             loadInvoices();
@@ -159,19 +231,15 @@
                 
                 try {
                     const querySnapshot = await db.collection("invoices").orderBy("createdAt", "desc").get();
-                    
                     allInvoices = []; 
                     if (querySnapshot.empty) {
                          tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No invoices found.</td></tr>';
                          return;
                     }
-                    
                     querySnapshot.forEach(doc => {
                         allInvoices.push({ id: doc.id, ...doc.data() });
                     });
-
                     renderTable(allInvoices); 
-
                 } catch (error) {
                     console.error("Error loading invoices: ", error);
                     tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: red;">Error loading invoices: ${error.message}</td></tr>`;
@@ -181,20 +249,15 @@
             function renderTable(invoices) {
                 const tableBody = document.getElementById('invoicesTableBody');
                 tableBody.innerHTML = ''; 
-
                 if (invoices.length === 0) {
                     tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No invoices match your search.</td></tr>';
                     return;
                 }
-
                 invoices.forEach(invoice => {
                     const row = document.createElement('tr');
-                    
+                    row.id = `invoice-${invoice.id}`; 
                     const status = invoice.status || 'Unpaid';
-                    let statusClass = '';
-                    if (status === 'Paid') statusClass = 'status-paid';
-                    if (status === 'Unpaid') statusClass = 'status-unpaid';
-                    if (status === 'Partial') statusClass = 'status-partial';
+                    let statusClass = (status === 'Paid') ? 'status-paid' : 'status-unpaid';
 
                     row.innerHTML = `
                         <td><b>${invoice.invoiceNo || invoice.id}</b></td>
@@ -206,11 +269,11 @@
                             <select class="status-select ${statusClass}" data-invoice-id="${invoice.invoiceNo}">
                                 <option value="Unpaid" ${status === 'Unpaid' ? 'selected' : ''}>Unpaid</option>
                                 <option value="Paid" ${status === 'Paid' ? 'selected' : ''}>Paid</option>
-                                <option value="Partial" ${status === 'Partial' ? 'selected' : ''}>Partial</option>
                             </select>
                         </td>
                         <td>
-                            <a href="${invoice.pdfUrl}" target="_blank" class="btn-view-pdf">View PDF</a>
+                            <a href="${invoice.pdfUrl || '#'}" target="_blank" class="btn-view-pdf">View PDF</a>
+                            <button class="btn-delete" data-invoice-id="${invoice.invoiceNo}" data-pdf-url="${invoice.pdfUrl || ''}">Delete</button>
                         </td>
                     `;
                     tableBody.appendChild(row);
@@ -219,6 +282,9 @@
                 tableBody.querySelectorAll('.status-select').forEach(select => {
                     select.addEventListener('change', handleStatusChange);
                 });
+                tableBody.querySelectorAll('.btn-delete').forEach(button => {
+                    button.addEventListener('click', handleDeleteInvoice);
+                });
             }
 
             function filterTable(searchTerm) {
@@ -226,7 +292,6 @@
                     const invoiceNo = (invoice.invoiceNo || invoice.id).toLowerCase();
                     const clientName = (invoice.clientName || '').toLowerCase();
                     const clientPhone = (invoice.clientPhone || '').toLowerCase();
-                    
                     return invoiceNo.includes(searchTerm) || 
                            clientName.includes(searchTerm) || 
                            clientPhone.includes(searchTerm);
@@ -237,51 +302,133 @@
             async function handleStatusChange(e) {
                 const newStatus = e.target.value;
                 const invoiceId = e.target.dataset.invoiceId;
-                
-                if (!invoiceId) {
-                    alert("Error: Could not find invoice ID.");
-                    return;
-                }
+                if (!invoiceId) { alert("Error: Could not find invoice ID."); return; }
 
                 e.target.className = 'status-select'; 
                 if (newStatus === 'Paid') e.target.classList.add('status-paid');
                 if (newStatus === 'Unpaid') e.target.classList.add('status-unpaid');
-                if (newStatus === 'Partial') e.target.classList.add('status-partial');
 
                 try {
                     const invoiceRef = db.collection("invoices").doc(invoiceId);
-                    await invoiceRef.update({
-                        status: newStatus
-                    });
+                    await invoiceRef.update({ status: newStatus });
                     console.log(`Invoice ${invoiceId} status updated to ${newStatus}`);
-                    
                     const invoiceInMemory = allInvoices.find(inv => inv.invoiceNo === invoiceId);
-                    if(invoiceInMemory) {
-                        invoiceInMemory.status = newStatus;
-                    }
-                    
+                    if(invoiceInMemory) invoiceInMemory.status = newStatus;
                 } catch (error) {
                     console.error("Error updating status: ", error);
                     alert(`Error updating status: ${error.message}`);
                 }
             }
+
+            // =============================================
+            // DELETE LOGIC (MODAL KE SAATH) - FIXED
+            // =============================================
+            
+            function handleDeleteInvoice(e) {
+                const invoiceId = e.target.dataset.invoiceId;
+                const pdfUrl = e.target.dataset.pdfUrl;
+                if (!invoiceId) { alert("Error: Could not find invoice ID."); return; }
+                showConfirmModal(invoiceId, pdfUrl);
+            }
+
+            function showConfirmModal(invoiceId, pdfUrl) {
+                modalConfirmMessage.innerHTML = `Do you really want to delete Invoice #<strong>${invoiceId}</strong>?<br>This will delete the data <strong>and the PDF file</strong>. This action cannot be undone.`;
+                
+                // =============================================
+                // YEH HAI FIX: CloneNode waali galat lines hata di hain
+                // =============================================
+                
+                // Naya click event set karein (purana overwrite ho jayega)
+                modalConfirmDeleteBtn.onclick = () => {
+                    executeDelete(invoiceId, pdfUrl);
+                };
+
+                confirmModalOverlay.classList.add('visible');
+            }
+
+            function hideConfirmModal() {
+                confirmModalOverlay.classList.remove('visible');
+            }
+
+            async function executeDelete(invoiceId, pdfUrl) {
+                modalConfirmDeleteBtn.disabled = true;
+                modalConfirmDeleteBtn.innerText = "Deleting...";
+
+                try {
+                    console.log(`Deleting Firestore doc: ${invoiceId}`);
+                    await db.collection("invoices").doc(invoiceId).delete();
+
+                    if (pdfUrl && pdfUrl.startsWith("https://firebasestorage.googleapis.com")) {
+                        console.log(`Deleting Storage file: ${pdfUrl}`);
+                        const fileRef = storage.refFromURL(pdfUrl);
+                        await fileRef.delete();
+                    }
+
+                    const row = document.getElementById(`invoice-${invoiceId}`);
+                    if (row) row.remove();
+                    allInvoices = allInvoices.filter(inv => inv.id !== invoiceId);
+
+                    hideConfirmModal();
+                    showSuccessModal('Deleted!', `Invoice #${invoiceId} has been deleted successfully.`);
+
+                } catch (error) {
+                    console.error("Error deleting invoice: ", error);
+                    hideConfirmModal();
+                    if (error.code === 'storage/object-not-found') {
+                         showSuccessModal('Data Deleted', `Invoice data was deleted, but the PDF file was not found in Storage.`);
+                         const row = document.getElementById(`invoice-${invoiceId}`);
+                         if (row) row.remove();
+                    } else {
+                        alert(`Error deleting invoice: ${error.message}.`);
+                    }
+                } finally {
+                     modalConfirmDeleteBtn.disabled = false;
+                     modalConfirmDeleteBtn.innerText = "Delete";
+                }
+            }
+
+            // Success modal ke "OK" button ke liye listener
+            modalOkBtn.addEventListener('click', hideSuccessModal);
+            function showSuccessModal(title, message) {
+                modalSuccessTitle.innerText = title;
+                modalSuccessMessage.innerText = message;
+                successModalOverlay.classList.add('visible');
+                // Checkmark animation ko reset/restart karein
+                const checkIconPath = successModalOverlay.querySelector('.modal-icon-container svg path');
+                if (checkIconPath) {
+                    checkIconPath.style.animation = 'none'; 
+                    checkIconPath.getBoundingClientRect(); 
+                    checkIconPath.style.animation = 'draw-check-animation 0.5s 0.2s ease-out forwards';
+                }
+            }
+            function hideSuccessModal() {
+                successModalOverlay.classList.remove('visible');
+            }
+
+            // Naye modal buttons ke listeners
+            modalConfirmCancelBtn.addEventListener('click', hideConfirmModal);
+            confirmModalOverlay.addEventListener('click', (e) => {
+                if(e.target === confirmModalOverlay) hideConfirmModal();
+            });
+            successModalOverlay.addEventListener('click', (e) => {
+                if(e.target === successModalOverlay) hideSuccessModal();
+            });
         });
     </script>
 
     <script>
-        // Basic Hamburger Toggle for this page
+        // Hamburger Menu + Click-outside logic
         const menuToggle = document.getElementById('menuToggle');
         const sidebar = document.getElementById('sidebar');
-        const mainContent = document.querySelector('.main-content'); // Main content ko select karein
+        const mainContent = document.querySelector('.main-content'); 
 
         if (menuToggle && sidebar) {
-            menuToggle.addEventListener('click', (e) => { // 'e' add kiya
-                e.stopPropagation(); // <-- YEH HAI FIX
+            menuToggle.addEventListener('click', (e) => { 
+                e.stopPropagation(); 
                 sidebar.classList.toggle('sidebar-visible');
             });
         }
         
-        // Naya click-outside logic
         if (mainContent && sidebar) {
              mainContent.addEventListener('click', () => {
                 if (sidebar.classList.contains('sidebar-visible')) {
@@ -290,7 +437,7 @@
             });
         }
 
-        // Basic Logout for this page
+        // Logout
          const logoutBtn = document.getElementById('logoutBtn');
          if (logoutBtn) {
              logoutBtn.addEventListener('click', (e) => {
@@ -303,17 +450,6 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
 
 
 
