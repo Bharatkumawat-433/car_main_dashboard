@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Car Repair Invoice (Simple)</title>
+    <link rel="stylesheet" href="style.css"> 
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        /* Invoice-specific styles (Aapke original jaise hi) */
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        
+        .invoice-container {
+            width: 800px;
+            margin: 20px auto;
+            padding: 15px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        td, th {
+            border: 1px solid #000;
+            padding: 8px;
+            vertical-align: top;
+            text-align: left;
+        }
+        .header-section table, .buyer-seller-section table {
+            width: 100%;
+        }
+        .header-section td {
+            width: 50%;
+        }
+        .header-section .right-details td {
+            width: 50%;
+            border: none;
+            padding: 0;
+        }
+        .header-section .right-details td div {
+            padding: 8px;
+            border-left: 1px solid #000;
+            border-top: 1px solid #000;
+            border-right: 1px solid #000;
+            border-bottom: none;
+        }
+        .header-section .right-details tr:last-child td div {
+            border-bottom: 1px solid #000;
+        }
+
+        .section-title {
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .align-right {
+            text-align: right;
+        }
+        .align-center {
+            text-align: center;
+        }
+        .items-table-header th {
+            text-align: center;
+            background-color: #f2f2f2;
+        }
+        .total-amount-row td {
+            font-weight: bold;
+        }
+        .declaration-section {
+            margin-top: 20px;
+            border: 1px solid #000;
+            padding: 10px;
+            position: relative;
+        }
+        input[type="text"], input[type="date"], input[type="email"], textarea {
+            width: 100%;
+            box-sizing: border-box;
+            border: none;
+            text-align: inherit;
+            background: transparent;
+            font-family: inherit;
+            font-size: inherit;
+        }
+        #invoiceDate {
+            font-family: Arial, sans-serif;
+            font-size: 16px; 
+            font-weight: bold;
+        }
+        .less-label {
+            height: 120px;
+            position: relative;
+        }
+        .less-tax-details {
+            padding: 0;
+        }
+        .add-remove-btn-container {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+        }
+        .add-remove-btn-container button {
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        textarea.buyer-input {
+            resize: none; 
+            overflow: hidden;
+            line-height: 1.4;
+        }
+        .buyer-input[readonly], textarea.buyer-input[readonly] {
+            border: none;
+            background-color: white;
+            cursor: default;
+            padding-left: 2px;
+        }
+        .buyer-input {
+             border-bottom: 1px dashed #ccc;
+             padding: 1px 0;
+        }
+        .buyer-input:focus, textarea.buyer-input:focus {
+             outline: none;
+             border-bottom: 1px solid #007bff;
+        }
+
+        .transport-input {
+            width: 95%;
+            border: none;
+            background: transparent;
+            border-bottom: 1px dashed #ccc;
+            font-weight: bold;
+            padding: 1px 0;
+        }
+        .transport-input:focus {
+             outline: none;
+             border-bottom: 1px solid #007bff;
+        }
+        .main-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0 10px;
+        }
+        #i1{
+            margin: 0;
+            padding-bottom: 10px;
+            flex-grow: 1;
+            text-align: center;
+        }
+        .action-buttons {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .action-buttons button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 5px; 
+            cursor: pointer;
+            border-radius: 5px;
+            border: none;
+            color: white;
+            background-color: #007bff;
+        }
+        #viewBtn {
+            background-color: #17a2b8;
+        }
+        #downloadBtn {
+            background-color: #28a745;
+        }
+        /* Email/WhatsApp buttons yahaan se hata diye hain kyunki data save nahi ho raha */
+        #emailBtn {
+             display: none;
+        }
+        #whatsappBtn {
+            background-color: #25D366; 
+        }
+
+        /* Pop-up Modals CSS */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6); display: none;
+            justify-content: center; align-items: center; z-index: 1000;
+            font-family: 'Poppins', sans-serif, Arial;
+        }
+        .modal-content {
+            background: #ffffff; padding: 25px; border-radius: 8px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2); width: 100%; max-width: 400px;
+            opacity: 0; transform: translateY(-20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .modal-overlay.visible { display: flex; }
+        .modal-overlay.visible .modal-content { opacity: 1; transform: translateY(0); }
+        .modal-content h3 { margin-top: 0; color: var(--dark-color); font-size: 22px; }
+        .modal-content p { font-size: 15px; color: var(--grey-color); margin-bottom: 15px; line-height: 1.5; }
+        .modal-buttons { margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px; }
+        .modal-btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: 600; transition: background-color 0.2s ease; }
+        .modal-btn-send { background-color: var(--primary-color); color: white; }
+        .modal-btn-send:hover { background-color: #0056b3; }
+        .modal-btn-cancel { background-color: #f1f1f1; color: var(--dark-color); }
+        .modal-btn-cancel:hover { background-color: #e0e0e0; }
+        .modal-success-content { text-align: center; padding: 30px 25px; }
+        .modal-icon-container { width: 70px; height: 70px; border-radius: 50%; margin: 0 auto 20px auto; display: flex; justify-content: center; align-items: center; background-color: #E8F5E9; }
+        .modal-icon-container svg { width: 40px; height: 40px; stroke: #4CAF50; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; fill: none; stroke-dasharray: 48; stroke-dashoffset: 48; animation: draw-check-animation 0.5s 0.2s ease-out forwards; }
+        @keyframes draw-check-animation { from { stroke-dashoffset: 48; } to { stroke-dashoffset: 0; } }
+        #modalSuccessTitle { color: #388E3C; font-size: 24px; margin-bottom: 10px; }
+        #modalSuccessMessage { font-size: 16px; color: var(--grey-color); }
+        .modal-success-content .modal-btn-send { background-color: #4CAF50; }
+        .modal-success-content .modal-btn-send:hover { background-color: #388E3C; }
+
+
+        /* Print Styles */
+        @media print {
+            body { background-color: white; padding: 0; margin: 0;}
+            .invoice-wrapper { margin: 0 auto; padding: 0; width: 100%;}
+            .invoice-container { box-shadow: none; border: none; margin: 0; padding: 5mm; width: 100%; page-break-after: avoid;}
+            .action-buttons, .add-remove-btn-container, .modal-overlay { display: none !important;}
+            table, tr, td, th { page-break-inside: avoid !important; }
+            input[type="text"], textarea { border: none !important; background: transparent !important; print-color-adjust: exact; -webkit-print-color-adjust: exact; } 
+            .buyer-input, .transport-input { border-bottom: none !important; }
+        }
+    </style>
+
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-firestore-compat.js"></script>
+    <script>
+      // ⚠️ IMPORTANT: Apna Firebase Config object yahaan paste karein
+      const firebaseConfig = {
+        apiKey: "AIzaSyCuejc7aR7-dLpcXh7uUTrWDsItWxQius8",
+        authDomain: "car-main-dashboard.firebaseapp.com",
+        projectId: "car-main-dashboard",
+        storageBucket: "car-main-dashboard.firebasestorage.app",
+        messagingSenderId: "574310288597",
+        appId: "1:574310288597:web:0859b5d5d453727fb2265c",
+        measurementId: "G-SMNFE0421H"
+      };
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+      // 'storage' aur 'functions' ko initialize nahi kiya
+    </script>
+    
+    <script src="auth-guard.js"></script>
+</head>
+<body>
+
+<div class="invoice-wrapper">
+
+    <div class="invoice-container" id="invoiceToPrint">
+        <div class="main-header"> <h2 id="i1"> SERVICE INVOICE</h2> </div>
+        <table class="header-section">
+            <tr>
+                <td style="width: 50%;">
+                    <div> <span class="section-title">Alankar Car Décor</span><br> Shop No.4, Dhruvi Mall, College Road, Gohar Baug,<br> Near Honest, Bilimora - 396321<br> GSTIN : 24AOHPJ2421H1ZD <br>Phone No : 7874879799  <br> State : GUJARAT &emsp; &emsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Code: 24 
+                </div> 
+                </td>
+                
+                <td style="padding: 0; height: 100%;">
+                    <table class="right-details" style="width: 100%; height: 100%;">
+                        <tr style="height: 50%;">
+                            <td style="width: 50%;"> <div>Invoice No.<br> <span class="section-title"> <input type="text" id="invoiceNumberInput" placeholder="Invoice No." style="width: 100%; text-align:center; font-weight: bold; font-size: 16px;"> </span> </div> </td>
+                            <td style="width: 50%;"> <div>Dated<br><input type="text" id="invoiceDate" style="text-align: center;" placeholder="dd/mm/yyyy"></div> </td>
+                        </tr>
+                        <tr style="height: 50%;">
+                            <td> <div style="height: 89px; padding-top: 10px;"> Vehicle No.<br> <input type="text" id="vehicleNoInput" class="transport-input" placeholder="GJ01AB1234" > </div> </td>
+                            <td> <div style="height: 89px; padding-top: 10px;" > Vehicle Model<br> <input type="text" id="vehicleModelInput" class="transport-input" placeholder="Maruti Swift 2021"> </div> </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+        
+        <table class="buyer-seller-section">
+            <tr>
+                <td colspan="2" style="border-bottom: none;">
+                    <div id="billToSection" style="line-height: 1.8;">
+                        <span class="section-title">Client Details (Bill to)</span><br>
+                        
+                        <div style="display: flex;">
+                            <label style="width: 100px; font-weight: bold;">Name :</label>
+                            <input type="text" id="billToName" class="buyer-input section-title" placeholder="Client Name" style="flex-grow: 1;">
+                        </div>
+                        
+
+                        <div style="display: flex;">
+                            <label style="width: 100px; font-weight: bold;">Phone No :</label>
+                            <input type="text" id="clientPhoneInput" class="buyer-input" style="flex-grow: 1;">
+                        </div>
+
+                        
+
+                        <div style="display: flex;">
+                            <label style="width: 100px; font-weight: bold;">Address :</label>
+                            <textarea id="billToAddress" class="buyer-input" placeholder="Client Address" style="flex-grow: 1; line-height: 1.4; border-bottom: none;" rows="1"></textarea>
+                        </div>
+                        
+                        <div style="display: flex;">
+                            <label style="width: 100px; font-weight:bold">State :</label>
+                            <input type="text" id="billToState" class="buyer-input">
+                            <div style="display: flex;">
+                            <label style="width: 100px; font-weight: bold;">Code : </label>
+                            <input type="text" id="billToCode" class="buyer-input" >
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <table id="invoiceTable">
+            <thead> 
+                <tr class="items-table-header"> 
+                    <th rowspan="2" style="width: 2%;">S.No</th> 
+                    <th rowspan="2" colspan="2" style="width: 25%;">Service / Part Description</th> 
+                    <th rowspan="2" style="width: 13%;">Quantity</th> 
+                    <th rowspan="2" style="width: 10%;">Actual Rate</th> 
+                    <th rowspan="2" style="width: 10%;">Discounted Rate</th> 
+                    <th rowspan="2" style="width: 7%;">per</th> 
+                    <th rowspan="2" style="width: 18%;">Amount</th> 
+                </tr> 
+                <tr></tr> 
+            </thead>
+            <tbody id="invoiceTableBody"> 
+                <tr class="item-row"> 
+                    <td class="align-center">1</td> 
+                    <td colspan="2"><input type="text" class="description-input" placeholder="Full Car Service"></td> 
+                    <td class="align-right"> <input type="text" class="quantity-input" value="1" style="text-align: center;"> </td> 
+                    <td class="align-right"> <input type="text" class="actual-rate-input" placeholder="0.00"> </td> 
+                    <td class="align-right"> <input type="text" class="discounted-rate-input" value="" placeholder="0.00"> </td> 
+                    <td class="align-center"><input type="text" class="per-input" value="Pcs"></td> 
+                    <td class="align-right amount-cell">0.00</td> 
+                </tr> 
+            </tbody>
+            <tfoot id="invoiceTableFoot">
+                <tr>
+                    <td colspan="3" class="less-label" style="border-bottom: 1px solid #000;"> <div class="add-remove-btn-container"> <button type="button" id="addRowBtn">Add Item</button> <button type="button" id="removeRowBtn">Remove</button> </div> </td>
+                    <td colspan="5" class="less-tax-details" style="padding:0; border-bottom: 1px solid #000;">
+                         <div style="padding: 8px; text-align: right; font-weight: bold; font-size: 1.1rem;">
+                            Total : <span id="totalTaxableValue">0.00</span>
+                         </div>
+                    </td>
+                </tr>
+                <tr class="total-amount-row"> 
+                    <td colspan="3" class="align-right">Total Amount </td> 
+                    <td class="align-right" id="totalQuantity">0.00 Pcs</td> 
+                    <td colspan="3"></td> 
+                    <td class="align-right" id="grandTotal">₹ 0.00</td> 
+                </tr>
+                <tr> <td colspan="8"> <div id="amountInWords"> <span class="section-title">Amount Chargeable (in words) : </span><br> Zero Only </div> </td> </tr>
+                
+               <tr>
+                    <td colspan="8" class="declaration-section">
+                        <div> <b>Company's Bank Details</b><br> Bank Name : <b>ICICI BANK
+</b><br> A/c No.   : <b>138205001014
+</b><br> Branch    : <b>Bilimora</b><br> IFSC Code : <b>ICIC0001382
+</b> </div>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 30px;">
+                            <div > <b>Declaration</b><br> <p>We declare that this invoice shows the actual price of the goods <br> described and that all particulars are true and correct.</p> </div>
+                            <div style="text-align: right; padding-bottom: 10px;"> <b>For Alankar Car Décor</b><br><br><br><br> Authorised Signatory </div>
+                        </div>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+        <h5 style="text-align: center ; margin-top: 10px;">This is a Computer Generated Invoice</h5>
+    </div>
+    
+    <div class="action-buttons">
+        <button type="button" id="dashboardBtn">Go To Dashboard</button>
+        <button type="button" id="viewBtn">View Invoice</button>
+        <button type="button" id="downloadBtn">Save & Download PDF</button>
+        <button type="button" id="emailBtn" disabled>Send Email</button> <button type="button" id="whatsappBtn">Open WhatsApp</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="successModalOverlay">
+    <div class="modal-content modal-success-content">
+        <div class="modal-icon-container">
+            <svg viewBox="0 0 50 50">
+                <path fill="transparent" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+            </svg>
+        </div>
+        <h3 id="modalSuccessTitle">Success!</h3>
+        <p id="modalSuccessMessage">Your action was completed successfully.</p>
+        <div class="modal-buttons">
+            <button type="button" id="modalOkBtn" class="modal-btn modal-btn-send">OK</button>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    const { jsPDF } = window.jspdf;
+    let roundedGrandTotal = 0; 
+    let savedInvoiceData = null; // Store saved invoice data for emailing
+
+    // =============================================
+    // NAYA: SAVE & DOWNLOAD FUNCTION (Simple)
+    // =============================================
+    async function saveAndDownloadPDF() {
+        const downloadBtn = document.getElementById('downloadBtn');
+        
+        const invoiceNumber = document.getElementById('invoiceNumberInput').value.trim();
+        if (!invoiceNumber) {
+            alert("Please enter an Invoice Number before saving.");
+            return;
+        }
+        
+        if (downloadBtn.disabled) return; 
+
+        downloadBtn.disabled = true;
+        downloadBtn.innerText = 'Saving...';
+
+        const invoiceElement = document.getElementById('invoiceToPrint');
+        
+        const clientName = document.getElementById('billToName').value.trim() || 'N/A';
+        const clientPhone = document.getElementById('clientPhoneInput').value.trim() || 'N/A';
+        const clientGstin = document.getElementById('clientGstinInput').value.trim() || ''; 
+        const clientAddress = document.getElementById('billToAddress').value.trim() || ''; 
+        const clientState = document.getElementById('billToState').value.trim() || '';
+        const clientCode = document.getElementById('billToCode').value.trim() || '';
+        const vehicleNo = document.getElementById('vehicleNoInput').value.trim() || 'N/A';
+        const vehicleModel = document.getElementById('vehicleModelInput').value.trim() || 'N/A'; 
+        const invoiceDateValue = document.getElementById('invoiceDate').value.trim(); 
+        const fileName = `${invoiceNumber}_${clientName.replace(/[\s\/]/g, '_')}.pdf`; 
+
+        const addRemoveContainer = invoiceElement.querySelector('.add-remove-btn-container');
+        addRemoveContainer.style.display = 'none'; // Hide buttons for PDF
+
+        try {
+            // PDF Generate karein
+            const canvas = await html2canvas(invoiceElement, { 
+                scale: 3, useCORS: true, logging: false,
+                letterRendering: true, backgroundColor: '#ffffff'
+            });
+            const imageData = canvas.toDataURL('image/jpeg', 0.95); 
+            const pdf = new jsPDF({
+                orientation: 'p', unit: 'pt', format: 'a4',
+                putOnlyUsedFonts: true, floatPrecision: 16
+            });
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = pdf.internal.pageSize.getHeight();
+            const margin = 40; 
+            const availableWidth = pdfWidth - 2 * margin;
+            const availableHeight = pdfHeight - 2 * margin;
+            const imgRatio = canvas.width / canvas.height;
+            let imgWidth = availableWidth; let imgHeight = imgWidth / imgRatio;
+            if (imgHeight > availableHeight) {
+                imgHeight = availableHeight;
+                imgWidth = imgHeight * imgRatio;
+            }
+            const x = margin + (availableWidth - imgWidth) / 2; 
+            const y = margin; 
+            pdf.addImage(imageData, 'JPEG', x, y, imgWidth, imgHeight);
+            
+            // PDF ko Storage par upload NAHI karna hai
+
+            // Data ko 'simple_invoices' collection mein save karein
+            const payload = {
+                invoiceNo: invoiceNumber,
+                clientName: clientName,
+                clientPhone: clientPhone,
+                clientGstin: clientGstin,
+                clientAddress: clientAddress, 
+                clientState: clientState,
+                clientCode: clientCode,
+                vehicleNo: vehicleNo,
+                vehicleModel: vehicleModel,
+                invoiceDate: invoiceDateValue,
+                grandTotal: roundedGrandTotal, 
+                status: 'Unpaid', 
+                // pdfUrl field nahi hai
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            
+            console.log("Saving simple invoice data to Firestore...");
+            // NAYI COLLECTION: 'simple_invoices'
+            await db.collection("simple_invoices").doc(invoiceNumber).set(payload, { merge: true });
+            console.log("Firestore save successful.");
+
+            savedInvoiceData = payload; // Local use ke liye
+            pdf.save(`${invoiceNumber}.pdf`); // PDF ko seedha download karein
+
+            // Naya Success Pop-up dikhayein
+            showSuccessModal('Saved Successfully!', `Invoice ${invoiceNumber} has been saved and downloaded.`);
+
+        } catch (error) {
+            console.error("An error occurred during save and download:", error);
+            if (error.code === 'permission-denied') {
+                 alert("Error saving invoice data: Permission denied. Check Firestore Rules.");
+            } else {
+                alert("Error saving invoice: " + error.message + ". Check console for details.");
+            }
+        } finally {
+            addRemoveContainer.style.display = 'flex';
+            downloadBtn.disabled = false;
+            downloadBtn.innerText = 'Save & Download PDF';
+        }
+    }
+
+    // Email function (Is page par zaroorat nahi)
+    // async function sendInvoiceEmail() { ... }
+
+    // =================================================================
+    // NAYA: MODAL HELPER FUNCTIONS
+    // =================================================================
+    function showSuccessModal(title, message) {
+        const modalOverlay = document.getElementById('successModalOverlay');
+        if (modalOverlay) {
+            document.getElementById('modalSuccessTitle').innerText = title;
+            document.getElementById('modalSuccessMessage').innerText = message;
+            modalOverlay.classList.add('visible'); // Modal dikhayein
+            
+            const checkIconPath = modalOverlay.querySelector('.modal-icon-container svg path');
+            if (checkIconPath) {
+                checkIconPath.style.animation = 'none'; 
+                checkIconPath.getBoundingClientRect(); 
+                checkIconPath.style.animation = 'draw-check-animation 0.5s 0.2s ease-out forwards'; 
+            }
+        }
+    }
+    
+    function hideSuccessModal() {
+         const modalOverlay = document.getElementById('successModalOverlay');
+         if (modalOverlay) {
+            modalOverlay.classList.remove('visible'); // Modal chhupayein
+         }
+    }
+
+    // =================================================================
+    // WHATSAPP FUNCTION
+    // =================================================================
+    function openWhatsAppChat() {
+        const mobileInput = document.getElementById('clientPhoneInput'); 
+        let clientNumber = mobileInput.value.trim();
+
+        if (clientNumber === "") {
+            alert("Please enter the client's mobile number in the 'Phone No :' field first.");
+            return;
+        }
+        
+        if (clientNumber.length === 10 && !clientNumber.startsWith('+')) {
+            clientNumber = '91' + clientNumber;
+        }
+
+        const whatsappUrl = `https://wa.me/${clientNumber}`;
+        window.open(whatsappUrl, '_blank');
+
+        alert("WhatsApp chat opened! Please manually attach the invoice PDF (which should be in your downloads folder) and send it.");
+    }
+
+
+    // Initialize the page when DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+        if (typeof db === 'undefined' || typeof firebase === 'undefined' || typeof firebase.auth === 'undefined') {
+            console.error("Firebase services (db, auth) not initialized.");
+            alert("Application Error: Firebase services failed to load.");
+            // Sabhi buttons disable karein
+            ['dashboardBtn', 'viewBtn', 'downloadBtn', 'whatsappBtn'].forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) btn.disabled = true;
+            });
+            return; 
+        }
+
+        // Auth check happens via auth-guard.js included in <head>
+
+        // Button event listeners
+        document.getElementById('dashboardBtn').addEventListener('click', () => { window.location.href = 'index.html'; });
+        document.getElementById('viewBtn').addEventListener('click', () => window.print());
+        document.getElementById('downloadBtn').addEventListener('click', saveAndDownloadPDF);
+        document.getElementById('whatsappBtn').addEventListener('click', openWhatsAppChat); // WhatsApp listener
+
+        // Item row listeners
+        document.getElementById('addRowBtn').addEventListener('click', addRow);
+        document.getElementById('removeRowBtn').addEventListener('click', removeRow);
+        
+        // Success modal listeners
+        const successModalOverlay = document.getElementById('successModalOverlay');
+        const modalOkBtn = document.getElementById('modalOkBtn');
+        if (modalOkBtn) modalOkBtn.addEventListener('click', hideSuccessModal);
+        if (successModalOverlay) {
+             successModalOverlay.addEventListener('click', (e) => {
+                if (e.target === successModalOverlay) hideSuccessModal();
+            });
+        }
+        
+        // Set today's date
+        const today = new Date();
+        const day = String(today.getDate()).padStart(2, '0');
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const year = today.getFullYear();
+        document.getElementById('invoiceDate').value = `${day}/${month}/${year}`;
+        
+        // Client address textarea ke liye auto-grow listener
+        const billToAddressTextarea = document.getElementById('billToAddress');
+        billToAddressTextarea.addEventListener('input', () => {
+            autoGrowTextarea(billToAddressTextarea);
+        });
+        
+        // Add listeners to initial item row inputs for calculation
+        document.querySelectorAll('#invoiceTableBody .item-row input').forEach(input => {
+            input.addEventListener('input', calculateInvoice);
+            input.addEventListener('focus', function() { this.select(); }); 
+        });
+        
+        // Initial calculation on page load
+        calculateInvoice();
+    });
+    
+    // --- Calculation and Row Functions (Simple) ---
+    // const taxRate = 0.09; // Tax ki zaroorat nahi
+    let itemCounter = document.querySelectorAll('#invoiceTableBody .item-row').length;
+
+    function autoGrowTextarea(element) { 
+        if (!element) return; 
+        element.style.height = "5px"; 
+        element.style.height = (element.scrollHeight) + "px"; 
+    }
+    
+    function formatNumber(num) { 
+        const number = Number(num);
+        if (isNaN(number) || !isFinite(number)) return '0.00'; 
+        return number.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); 
+    }
+    
+    function sanitizeInput(input) { 
+        const value = String(input || '0').replace(/,/g, ''); 
+        const sanitized = value.replace(/[^\d.-]/g, '').replace(/(?!^)-/g, '').replace(/(\..*)\./g, '$1');
+        return parseFloat(sanitized) || 0; 
+    }
+
+    function convertAmountToWords(amount) {
+        amount = Math.round(Number(amount)); 
+        if (amount === 0) return 'Zero Only';
+        if (amount < 0) return 'Minus ' + convertAmountToWords(Math.abs(amount)).replace('INR ','').replace(' Only',' Only');
+
+        const units = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+        const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+        const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+        const scales = ['', ' Thousand', ' Lakh', ' Crore']; 
+
+        function numberToWords(num) {
+            let words = '';
+            if (num >= 100) {
+                words += units[Math.floor(num / 100)] + ' Hundred';
+                num %= 100;
+                if (num > 0) words += ' and '; 
+            }
+            if (num >= 20) {
+                words += tens[Math.floor(num / 10)];
+                num %= 10;
+                if (num > 0) words += ' ' + units[num];
+            } else if (num >= 10) {
+                words += teens[num - 10];
+                num = 0;
+            } else if (num > 0) {
+                words += units[num];
+                num = 0;
+            }
+            return words;
+        }
+
+        let words = '';
+        let scaleIndex = 0;
+        if (amount === 0) return 'Zero Only';
+
+        while (amount > 0) {
+            let chunk;
+            if (scaleIndex === 0) { 
+                chunk = amount % 1000;
+                amount = Math.floor(amount / 1000);
+            } else { 
+                chunk = amount % 100;
+                amount = Math.floor(amount / 100);
+            }
+            
+            if (chunk > 0) {
+                words = numberToWords(chunk) + scales[scaleIndex] + (words ? ' ' + words : '');
+            }
+            scaleIndex++;
+        }
+        return 'INR ' + words.trim() + ' Only';
+    }
+
+    // =============================================
+    // CALCULATE INVOICE (SIMPLE) - Tax logic hata diya gaya hai
+    // =============================================
+    function calculateInvoice() {
+        let totalTaxableValue = 0; 
+        let totalQuantity = 0; 
+        let baseUnit = 'Pcs';
+        
+        const itemRows = document.querySelectorAll('#invoiceTableBody .item-row');
+        if (itemRows.length > 0) {
+             baseUnit = itemRows[0].querySelector('.per-input').value.trim() || 'Pcs';
+        }
+
+        itemRows.forEach(row => {
+            const quantityInput = row.querySelector('.quantity-input');
+            const rateInput = row.querySelector('.discounted-rate-input'); 
+            const amountCell = row.querySelector('.amount-cell');
+            
+            const quantity = sanitizeInput(quantityInput.value); 
+            const rate = sanitizeInput(rateInput.value); 
+            const amount = quantity * rate; 
+            
+            amountCell.innerText = formatNumber(amount); 
+            
+            totalTaxableValue += amount; 
+            totalQuantity += quantity; 
+        });
+
+        // Tax ka poora logic hata diya gaya hai
+        
+        // Grand Total ab seedha Total hi hai
+        roundedGrandTotal = Math.round(totalTaxableValue); 
+        // const roundOff = roundedGrandTotal - totalTaxableValue; // Round off ki zaroorat nahi
+
+        // Update Footer Values (Simplified)
+        document.getElementById('totalTaxableValue').innerText = formatNumber(totalTaxableValue); 
+        // CGST/SGST/RoundOff hata diye gaye
+        document.getElementById('grandTotal').innerText = `₹ ${formatNumber(roundedGrandTotal)}`; 
+        document.getElementById('totalQuantity').innerText = `${formatNumber(totalQuantity)} ${baseUnit}`; 
+        document.getElementById('amountInWords').innerHTML = `<span class="section-title">Amount Chargeable (in words)</span><br>${convertAmountToWords(roundedGrandTotal)}`; 
+    }
+    
+    // ADD ROW (Simple)
+    function addRow() {
+        const tableBody = document.getElementById('invoiceTableBody'); 
+        const newRow = document.createElement('tr'); 
+        newRow.className = 'item-row'; 
+        itemCounter++; 
+        newRow.innerHTML = ` 
+            <td class="align-center">${itemCounter}</td> 
+            <td colspan="2"><input type="text" class="description-input" placeholder="Service or Part"></td> 
+            <td class="align-right"><input type="text" class="quantity-input" value="1" style="text-align: center;"></td> 
+            <td class="align-right"><input type="text" class="actual-rate-input" placeholder="0.00"></td> 
+            <td class="align-right"><input type="text" class="discounted-rate-input" placeholder="0.00"></td> 
+            <td class="align-center"><input type="text" class="per-input" value="Pcs"></td> 
+            <td class="align-right amount-cell">0.00</td> 
+        `; 
+        tableBody.appendChild(newRow); 
+        newRow.querySelectorAll('input').forEach(input => { 
+            input.addEventListener('input', calculateInvoice); 
+            input.addEventListener('focus', function() { this.select(); }); 
+        }); 
+        calculateInvoice(); 
+    }
+    
+    function removeRow() {
+        const tableBody = document.getElementById('invoiceTableBody'); 
+        const rows = tableBody.querySelectorAll('.item-row'); 
+        if (rows.length > 1) { 
+            tableBody.removeChild(rows[rows.length - 1]); 
+            itemCounter--; 
+             tableBody.querySelectorAll('.item-row').forEach((row, index) => {
+                 row.firstElementChild.innerText = index + 1;
+             });
+            itemCounter = tableBody.querySelectorAll('.item-row').length; 
+            calculateInvoice(); 
+        } else { 
+            alert("At least one item row is required."); 
+        }
+    }
+</script>
+
+</body>
+</html>
