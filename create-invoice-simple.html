@@ -275,10 +275,9 @@
     </style>
 
     <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-firestore-compat.js"></script>
-
-    <script>
+<script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-storage-compat.js"></script> <script>
       const firebaseConfig = {
         apiKey: "AIzaSyCuejc7aR7-dLpcXh7uUTrWDsItWxQius8",
         authDomain: "car-main-dashboard.firebaseapp.com",
@@ -290,6 +289,7 @@
       };
       firebase.initializeApp(firebaseConfig);
       const db = firebase.firestore();
+      const storage = firebase.storage(); // NAYA
     </script>
     
     <script src="auth-guard.js"></script>
@@ -436,18 +436,15 @@
         </div>
     </div>
 </div>
-
-
 <script>
     const { jsPDF } = window.jspdf;
     let roundedGrandTotal = 0; 
     let savedInvoiceData = null; 
 
-    // SAVE & DOWNLOAD FUNCTION (Simple) - (Pichhle turn waala bug fixed code)
     async function saveAndDownloadPDF() {
         const downloadBtn = document.getElementById('downloadBtn');
-        
         const invoiceNumber = document.getElementById('invoiceNumberInput').value.trim();
+        
         if (!invoiceNumber) {
             alert("Please enter an Invoice Number before saving.");
             return;
@@ -459,84 +456,73 @@
         downloadBtn.innerText = 'Saving...';
 
         const invoiceElement = document.getElementById('invoiceToPrint');
-        
         const clientName = document.getElementById('billToName').value.trim() || 'N/A';
         const clientPhone = document.getElementById('clientPhoneInput').value.trim() || 'N/A';
-        const clientAddress = document.getElementById('billToAddress').value.trim() || ''; 
-        const clientState = document.getElementById('billToState').value.trim() || '';
-        const clientCode = document.getElementById('billToCode').value.trim() || '';
-        const vehicleNo = document.getElementById('vehicleNoInput').value.trim() || 'N/A';
-        const vehicleModel = document.getElementById('vehicleModelInput').value.trim() || 'N/A'; 
         const invoiceDateValue = document.getElementById('invoiceDate').value.trim(); 
-        const fileName = `${invoiceNumber}_${clientName.replace(/[\s\/]/g, '_')}.pdf`; 
+        const fileName = `simple_${invoiceNumber}_${clientName.replace(/[\s\/]/g, '_')}.pdf`; 
 
         const addRemoveContainer = invoiceElement.querySelector('.add-remove-btn-container');
         addRemoveContainer.style.display = 'none'; 
 
         try {
+            // PDF Generation
             const canvas = await html2canvas(invoiceElement, { 
                 scale: 3, useCORS: true, logging: false,
                 letterRendering: true, backgroundColor: '#ffffff'
             });
             const imageData = canvas.toDataURL('image/jpeg', 0.95); 
             const pdf = new jsPDF({
-                orientation: 'p', unit: 'pt', format: 'a4',
-                putOnlyUsedFonts: true, floatPrecision: 16
+                orientation: 'p', unit: 'pt', format: 'a4'
             });
             const pdfWidth = pdf.internal.pageSize.getWidth();
             const pdfHeight = pdf.internal.pageSize.getHeight();
             const margin = 40; 
             const availableWidth = pdfWidth - 2 * margin;
-            const availableHeight = pdfHeight - 2 * margin;
             const imgRatio = canvas.width / canvas.height;
-            let imgWidth = availableWidth; let imgHeight = imgWidth / imgRatio;
-            if (imgHeight > availableHeight) {
-                imgHeight = availableHeight;
-                imgWidth = imgHeight * imgRatio;
-            }
-            const x = margin + (availableWidth - imgWidth) / 2; 
-            const y = margin; 
-            pdf.addImage(imageData, 'JPEG', x, y, imgWidth, imgHeight);
+            let imgWidth = availableWidth; 
+            let imgHeight = imgWidth / imgRatio;
             
-            // PDF ko Storage par upload NAHI karna hai
+            pdf.addImage(imageData, 'JPEG', margin, margin, imgWidth, imgHeight);
+            
+            // PDF ko Blob mein badalna (NAYA LOGIC)
+            const pdfBlob = pdf.output('blob');
 
+            // 1. Firebase Storage par Upload Karein
+            console.log("Uploading Simple PDF to Storage...");
+            const storageRef = storage.ref(`simple_invoices/${fileName}`);
+            const uploadTask = await storageRef.put(pdfBlob);
+            const downloadURL = await uploadTask.ref.getDownloadURL();
+            console.log("Upload Success! URL:", downloadURL);
+
+            // 2. Firestore mein Data Save Karein (PDF URL ke saath)
             const payload = {
                 invoiceNo: invoiceNumber,
                 clientName: clientName,
                 clientPhone: clientPhone,
-                clientAddress: clientAddress, 
-                clientState: clientState,
-                clientCode: clientCode,
-                vehicleNo: vehicleNo,
-                vehicleModel: vehicleModel,
                 invoiceDate: invoiceDateValue,
                 grandTotal: roundedGrandTotal, 
+                pdfUrl: downloadURL, // NAYA
                 status: 'Unpaid', 
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             };
             
-            console.log("Saving simple invoice data to Firestore...");
             await db.collection("simple_invoices").doc(invoiceNumber).set(payload, { merge: true });
-            console.log("Firestore save successful.");
+            console.log("Firestore Save Success.");
 
-            savedInvoiceData = payload; 
             pdf.save(`${invoiceNumber}.pdf`); 
-
-            showSuccessModal('Saved Successfully!', `Invoice ${invoiceNumber} has been saved and downloaded.`);
+            showSuccessModal('Saved!', `Simple Invoice ${invoiceNumber} saved to Cloud.`);
 
         } catch (error) {
-            console.error("An error occurred during save and download:", error);
-            if (error.code === 'permission-denied') {
-                 alert("Error saving invoice data: Permission denied. Check Firestore Rules.");
-            } else {
-                alert("Error saving invoice: " + error.message + ". Check console for details.");
-            }
+            console.error("Error:", error);
+            alert("Error: " + error.message);
         } finally {
             addRemoveContainer.style.display = 'flex';
             downloadBtn.disabled = false;
             downloadBtn.innerText = 'Save & Download PDF';
         }
     }
+
+
 
     // MODAL HELPER FUNCTIONS
     function showSuccessModal(title, message) {
