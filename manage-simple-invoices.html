@@ -33,7 +33,7 @@
         }
         .btn-delete:hover { opacity: 0.9; }
 
-        
+        /* POP-UP MODALS CSS */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.6); display: none;
@@ -115,7 +115,7 @@
         <li><a href="create-invoice.html">Create Invoice (GST)</a></li>
         <li><a href="manage-invoices.html">Manage Invoices (GST)</a></li>
         <li><a href="reports.html">Reports (GST)</a></li>
-        <li><a href="create-invoice-simple.html">Create Invoice</a></li>
+        <li ><a href="create-invoice-simple.html">Create Invoice</a></li>
         <li class="active"><a href="manage-simple-invoices.html">Manage Invoices</a></li>
         <li><a href="reports-simple.html">Reports</a></li>
         <li><a href="#" id="logoutBtn">Logout</a></li> 
@@ -168,6 +168,7 @@
             </div>
         </div>
     </div>
+
     <div class="modal-overlay" id="confirmModalOverlay">
         <div class="modal-content modal-confirm-content">
             <div class="modal-icon-container warning">
@@ -181,6 +182,25 @@
             </div>
         </div>
     </div>
+
+    <div class="modal-overlay" id="noPdfModalOverlay">
+        <div class="modal-content" style="text-align: center;">
+            <div class="modal-icon-container" style="background-color: #FFF3E0; width: 70px; height: 70px; border-radius: 50%; margin: 0 auto 20px auto; display: flex; justify-content: center; align-items: center;">
+                <svg viewBox="0 0 24 24" width="40" height="40" stroke="#FF9800" stroke-width="2" fill="none">
+                    <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                    <polyline points="13 2 13 9 20 9"></polyline>
+                    <line x1="9" y1="13" x2="15" y2="13"></line>
+                    <line x1="9" y1="17" x2="15" y2="17"></line>
+                </svg>
+            </div>
+            <h3 style="color: #E65100;">PDF Not Found</h3>
+            <p>This invoice was created before the Cloud Backup system was enabled. No digital copy is available.</p>
+            <div class="modal-buttons" style="justify-content: center;">
+                <button type="button" onclick="hideNoPdfModal()" class="modal-btn" style="background-color: #FF9800; color: white;">Got it</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             if (typeof db === 'undefined') {
@@ -189,7 +209,6 @@
                 return;
             }
 
-            // Modal elements ko select karein
             const successModalOverlay = document.getElementById('successModalOverlay');
             const modalSuccessTitle = document.getElementById('modalSuccessTitle');
             const modalSuccessMessage = document.getElementById('modalSuccessMessage');
@@ -238,18 +257,13 @@
                 const tableBody = document.getElementById('invoicesTableBody');
                 tableBody.innerHTML = ''; 
 
-                if (invoices.length === 0) {
-                    tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No invoices match your search.</td></tr>';
-                    return;
-                }
-
                 invoices.forEach(invoice => {
                     const row = document.createElement('tr');
                     row.id = `invoice-${invoice.id}`;
-                    
                     const status = invoice.status || 'Unpaid';
                     let statusClass = (status === 'Paid') ? 'status-paid' : 'status-unpaid';
 
+                    // YAHAN VIEW BUTTON ADD KIYA HAI
                     row.innerHTML = `
                         <td><b>${invoice.invoiceNo || invoice.id}</b></td>
                         <td>${invoice.invoiceDate || 'N/A'}</td>
@@ -263,6 +277,10 @@
                             </select>
                         </td>
                         <td>
+                            <button class="btn-view" onclick="viewInvoicePdf('${invoice.pdfUrl}')" 
+                                    style="background-color: #17a2b8; color: white; padding: 5px 12px; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px; font-weight: 500;">
+                                View
+                            </button>
                             <button class="btn-delete" data-invoice-id="${invoice.invoiceNo}">Delete</button>
                         </td>
                     `;
@@ -311,10 +329,6 @@
                 }
             }
             
-            // =============================================
-            // DELETE LOGIC (MODAL KE SAATH) - FIXED
-            // =============================================
-            
             function handleDeleteInvoice(e) {
                 const invoiceId = e.target.dataset.invoiceId;
                 if (!invoiceId) { alert("Error: Could not find invoice ID."); return; }
@@ -323,15 +337,9 @@
 
             function showConfirmModal(invoiceId) {
                 modalConfirmMessage.innerHTML = `Do you really want to delete Simple Invoice #<strong>${invoiceId}</strong>?<br>This action cannot be undone.`;
-                
-                // =============================================
-                // YEH HAI FIX: CloneNode waali galat lines hata di hain
-                // =============================================
-                
                 modalConfirmDeleteBtn.onclick = () => {
                     executeDelete(invoiceId);
                 };
-
                 confirmModalOverlay.classList.add('visible');
             }
 
@@ -344,16 +352,12 @@
                 modalConfirmDeleteBtn.innerText = "Deleting...";
 
                 try {
-                    console.log(`Deleting Firestore doc: ${invoiceId}`);
                     await db.collection("simple_invoices").doc(invoiceId).delete();
-
                     const row = document.getElementById(`invoice-${invoiceId}`);
                     if (row) row.remove();
-                    allInvoices = allInvoices.filter(inv => inv.id !== invoiceId);
-
+                    allInvoices = allInvoices.filter(inv => inv.invoiceNo !== invoiceId);
                     hideConfirmModal();
                     showSuccessModal('Deleted!', `Simple Invoice #${invoiceId} has been deleted successfully.`);
-
                 } catch (error) {
                     console.error("Error deleting simple invoice: ", error);
                     hideConfirmModal();
@@ -364,13 +368,11 @@
                 }
             }
 
-            // Success modal ke "OK" button ke liye listener
             modalOkBtn.addEventListener('click', hideSuccessModal);
             function showSuccessModal(title, message) {
                 modalSuccessTitle.innerText = title;
                 modalSuccessMessage.innerText = message;
                 successModalOverlay.classList.add('visible');
-                // Checkmark animation ko reset/restart karein
                 const checkIconPath = successModalOverlay.querySelector('.modal-icon-container svg path');
                 if (checkIconPath) {
                     checkIconPath.style.animation = 'none'; 
@@ -382,7 +384,6 @@
                 successModalOverlay.classList.remove('visible');
             }
 
-            // Naye modal buttons ke listeners
             modalConfirmCancelBtn.addEventListener('click', hideConfirmModal);
             confirmModalOverlay.addEventListener('click', (e) => {
                 if(e.target === confirmModalOverlay) hideConfirmModal();
@@ -391,10 +392,26 @@
                 if(e.target === successModalOverlay) hideSuccessModal();
             });
         });
+
+        // VIEW PDF HELPER FUNCTIONS
+        function viewInvoicePdf(url) {
+            if (url && url !== "undefined" && url !== "null" && url !== "") {
+                window.open(url, '_blank');
+            } else {
+                showNoPdfModal();
+            }
+        }
+
+        function showNoPdfModal() {
+            document.getElementById('noPdfModalOverlay').classList.add('visible');
+        }
+
+        function hideNoPdfModal() {
+            document.getElementById('noPdfModalOverlay').classList.remove('visible');
+        }
     </script>
 
     <script>
-        // Hamburger Menu + Click-outside logic
         const menuToggle = document.getElementById('menuToggle');
         const sidebar = document.getElementById('sidebar');
         const mainContent = document.querySelector('.main-content'); 
@@ -414,7 +431,6 @@
             });
         }
 
-        // Logout
          const logoutBtn = document.getElementById('logoutBtn');
          if (logoutBtn) {
              logoutBtn.addEventListener('click', (e) => {
@@ -427,10 +443,4 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
 
